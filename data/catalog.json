@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "builtDate": "2026-10-10",
+  "datasets": [
+    {
+      "id": "jetliner",
+      "label": "宽体客机 / Jumbo Jet",
+      "sourceURL": "https://opengameart.org/content/jumbo-jetwide-body",
+      "license": "CC0-1.0",
+      "licenseURL": "https://opengameart.org/content/jumbo-jetwide-body",
+      "author": "NuclearOsmosis",
+      "downloadURL": "https://opengameart.org/sites/default/files/Jetliner.obj",
+      "purpose": "Thin wings, engine rims, fuselage and silhouette coverage.",
+      "path": "/data/models/jetliner.json",
+      "count": 15000,
+      "sourceKind": "mesh-derived",
+      "samplingSeed": 20261010,
+      "sha256": "48accc0230610382b44503c6044befe044cc84c50624b6f75d425c57b7f78a58"
+    },
+    {
+      "id": "funky-aircraft",
+      "label": "风格化飞机 / Funky aircraft",
+      "sourceURL": "https://opengameart.org/content/funky-aircraft",
+      "license": "CC0-1.0",
+      "licenseURL": "https://opengameart.org/content/funky-aircraft",
+      "author": "Savino",
+      "downloadURL": "https://opengameart.org/sites/default/files/high_0.obj",
+      "purpose": "Smooth aircraft surfaces with low-complexity geometry.",
+      "path": "/data/models/funky-aircraft.json",
+      "count": 15000,
+      "sourceKind": "mesh-derived",
+      "samplingSeed": 20261010,
+      "sha256": "68cfeab0542e002b885b16888103d94eb719428642b0e3b858dfb83f01f3cf9a"
+    },
+    {
+      "id": "stanford-bunny",
+      "label": "Stanford Bunny / 兔子",
+      "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
+      "licenseURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "author": "Stanford University Computer Graphics Laboratory",
+      "downloadURL": "https://graphics.stanford.edu/pub/3Dscanrep/bunny.tar.gz",
+      "purpose": "Curved body, thin ears, source reconstruction holes.",
+      "path": "/data/models/stanford-bunny.json",
+      "count": 15000,
+      "sourceKind": "mesh-derived",
+      "samplingSeed": 20261010,
+      "sha256": "6d4e73377e1f3688c44e8088ba5c9e853480a98ad932ea3725b46f25d308ee2e"
+    },
+    {
+      "id": "stanford-dragon",
+      "label": "Stanford Dragon / 龙",
+      "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
+      "licenseURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "author": "Stanford University Computer Graphics Laboratory",
+      "downloadURL": "https://graphics.stanford.edu/pub/3Dscanrep/dragon/dragon_recon.tar.gz",
+      "purpose": "Complex curves and fine sculptural features.",
+      "path": "/data/models/stanford-dragon.json",
+      "count": 15000,
+      "sourceKind": "mesh-derived",
+      "samplingSeed": 20261010,
+      "sha256": "2e716894537e62009f54d4d8629c5ad767b2e3efdf424b9bd56f5b91f8052014"
+    },
+    {
+      "id": "teapot",
+      "label": "Utah Teapot / 茶壶",
+      "sourceURL": "https://casual-effects.com/g3d/data10/",
+      "license": "CC0-1.0",
+      "licenseURL": "https://casual-effects.com/g3d/data10/common/model/teapot/info.js",
+      "author": "Martin Newell; closed/welded adaptation by Kenzie Lamar; archive by Morgan McGuire",
+      "downloadURL": "https://casual-effects.com/g3d/data10/common/model/teapot/teapot.zip",
+      "purpose": "Narrow spout and handle, cavities and surface curvature.",
+      "path": "/data/models/teapot.json",
+      "count": 15000,
+      "sourceKind": "mesh-derived",
+      "samplingSeed": 20261010,
+      "sha256": "b764f54da56331e5b467cd848873cf1da414f62c5a077714d29fae1219862732"
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+% Based on the supplied COMP5411 article template.
+% Build: pdflatex proposal.tex (twice). No BibTeX, shell escape or downloads.
+% PDF figures in assets/ are preferred; embedded TikZ fallbacks keep this
+% document compilable in editors that accept only a single .tex file.
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry,multicol,enumitem,graphicx,titling,fancyhdr}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array}
+\usepackage{xcolor,tikz,caption,microtype}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{hyperref}
+\geometry{left=20mm,right=20mm,top=30mm,bottom=30mm}
+\definecolor{ink}{HTML}{20384D}
+\definecolor{accent}{HTML}{A66224}
+\definecolor{lightblue}{HTML}{EEF3F7}
+\hypersetup{colorlinks=true,linkcolor=ink,citecolor=ink,urlcolor=ink,
+  pdftitle={COMP5411 Project Proposal: Temporally Stable Point Cloud Rendering},
+  pdfauthor={GAO, Yuanchen and ZHOU, Ziyu}}
+\urlstyle{same}
+\newcommand{\GroupNumber}{30}
+\newcommand{\ProjectName}{Saliency- and Geometry-Aware\\Temporally Stable Point Cloud Rendering}
+\newcommand{\ProjectAuthors}{GAO, Yuanchen and ZHOU, Ziyu}
+\newcommand{\GaoEmail}{ygaocv@connect.ust.hk}
+\newcommand{\ZhouEmail}{zzhou651@connect.ust.hk}
+% Yuanchen: replace the blank below with 1--2 sentences about your graphics
+% programming experience; the empty line is intentional.
+\newcommand{\YuanchenBackground}{\mbox{}\hrulefill}
+\newcommand{\DocTitle}{Project Proposal}
+\title{{\Large\bfseries\ProjectName}\\[0.35em]{\large\DocTitle}}
+\author{Group \GroupNumber\\[0.3em]
+\begin{tabular}{@{}c@{\hspace{2em}}c@{}}
+GAO, Yuanchen & ZHOU, Ziyu\\[-0.1em]
+{\small\href{mailto:\GaoEmail}{\texttt{\GaoEmail}}} &
+{\small\href{mailto:\ZhouEmail}{\texttt{\ZhouEmail}}}
+\end{tabular}}
+\date{HKUST -- COMP5411}
+\setlength{\droptitle}{-1.8cm}
+\pretitle{\centering}\posttitle{\par\vskip 0.7em}
+\preauthor{\centering\normalsize}\postauthor{\par\vskip 0.7em}
+\predate{\centering\normalsize}\postdate{\par\vskip -0.5em}
+\fancypagestyle{fancy}{
+  \fancyhf{}
+  \fancyhead[L]{\small\DocTitle\\\bfseries Stable Point Cloud Rendering}
+  \fancyhead[R]{\small Group \GroupNumber\\GAO, Yuanchen / ZHOU, Ziyu}
+  \fancyfoot[C]{\thepage}
+}
+\pagestyle{fancy}
+\setlength{\headheight}{25pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.25\baselineskip}
+\setlength{\emergencystretch}{1.5em}
+\setlist[itemize]{leftmargin=1.3em,itemsep=0.45em,topsep=0.35em,parsep=0pt}
+\captionsetup{font=small,labelfont=bf,skip=5pt}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+% Original proposal schematics; requires \usepackage{tikz}.
+% All coordinates are in cm. Native widths are at most 16 cm.
+% Keep at native size (or scale down by no more than 5%) to preserve 8 pt type.
+\usetikzlibrary{arrows.meta,positioning,calc}
+\definecolor{pcKnownFill}{HTML}{EEF3F7}
+\definecolor{pcKnownLine}{HTML}{60788A}
+\definecolor{pcTestFill}{HTML}{FFF0DF}
+\definecolor{pcTestLine}{HTML}{B96516}
+\definecolor{pcOutgoingFill}{HTML}{F3E6D9}
+\definecolor{pcInk}{HTML}{243746}
+\definecolor{pcMuted}{HTML}{54616B}
+
+\newcommand{\PipelineDiagram}{%
+\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  font=\fontsize{8.5}{10.2}\selectfont,text=pcInk,
+  pcbox/.style={draw=pcKnownLine,fill=pcKnownFill,line width=.6pt,
+    rounded corners=1.5pt,align=center,inner sep=4pt,minimum height=1.35cm},
+  pctest/.style={pcbox,draw=pcTestLine,fill=pcTestFill},
+  pcarrow/.style={-{Stealth[length=4.5pt,width=3.5pt]},line width=.7pt,draw=pcKnownLine},
+  pcfeedback/.style={pcarrow,draw=pcTestLine},
+  pclabel/.style={font=\fontsize{8.5}{10.2}\selectfont,text=pcMuted,align=center}
+]
+  \node[pcbox,text width=2.02cm] (pcinput) at (1.15,0)
+    {\textbf{Static input}\\PLY / XYZ\\positions; optional RGB};
+  \node[pcbox,text width=3.42cm] (pcoffline) at (4.80,0)
+    {\textbf{Offline preprocessing}\\PCA normals + radii\\persistent IDs + octree};
+  \node[pctest,text width=3.82cm] (pcselect) at (9.20,0)
+    {\textbf{Selection policy (to test)}\\CPU importance scores\\budget + hysteresis};
+  \node[pcbox,text width=3.62cm] (pcrender) at (13.95,0)
+    {\textbf{WebGL2 rendering}\\oriented surfel splats\\optional EDL post-pass};
+
+  \draw[pcarrow] (pcinput.east) -- (pcoffline.west);
+  \draw[pcarrow] (pcoffline.east) -- (pcselect.west);
+  \draw[pcarrow] (pcselect.east) -- node[above,pclabel,yshift=1pt] {$S_t$} (pcrender.west);
+
+  \node[draw=pcKnownLine,fill=white,line width=.6pt,rounded corners=1pt,
+    minimum height=.35cm,inner sep=3pt,align=center] (pccamera) at (9.20,1.34)
+    {Camera / view};
+  \draw[pcarrow] (pccamera.south) -- (pcselect.north);
+
+  \node[draw=pcTestLine,fill=pcTestFill,line width=.6pt,rounded corners=1pt,
+    minimum height=.48cm,text width=3.35cm,inner sep=3pt,align=center]
+    (pcmemory) at (9.20,-1.51)
+    {State: $S_t\mapsto S_{t-1}$};
+  % Output S_t is saved after selection; only the delayed state is fed back.
+  \fill[pcKnownLine] (11.62,0) circle[radius=1.2pt];
+  \draw[pcfeedback] (11.62,0) -- (11.62,-1.51)
+    -- node[above,pclabel,yshift=1pt] {save} (pcmemory.east);
+  \draw[pcfeedback] (pcmemory.west) -- (7.13,-1.51)
+    -- (7.13,-1.02) -- (8.10,-1.02) -- (8.10,-.675);
+  \node[pclabel,anchor=east,text=pcTestLine] at (7.03,-1.49) {previous selection};
+
+  \node[pclabel,anchor=west] at (0,-2.20)
+    {\textcolor{pcKnownLine}{\rule{8pt}{5pt}}\ Known components\qquad
+     \textcolor{pcTestLine}{\rule{8pt}{5pt}}\ Proposed selection and temporal policy};
+\end{tikzpicture}%
+}
+
+\newcommand{\BudgetDiagram}{%
+\begin{tikzpicture}[
+  x=1cm,y=1cm,
+  font=\fontsize{8.5}{10.2}\selectfont,text=pcInk,
+  pcbudgetframe/.style={draw=pcKnownLine,line width=.6pt,rounded corners=1.5pt},
+  pcbudgetlabel/.style={align=center,inner sep=0pt},
+  pcbudgetarrow/.style={-{Stealth[length=4pt,width=3pt]},draw=pcKnownLine,line width=.6pt}
+]
+  \draw[pcbudgetframe] (0,0) rectangle (7.70,3.20);
+  \draw[pcbudgetframe] (8.10,0) rectangle (15.80,3.20);
+  \node[pcbudgetlabel,font=\bfseries\fontsize{9}{10.8}\selectfont]
+    at (3.85,2.91) {MVP: budgeted discrete swaps};
+  \node[pcbudgetlabel,font=\bfseries\fontsize{9}{10.8}\selectfont]
+    at (11.95,2.91) {Optional extension: overlapping fades};
+  \node[pcbudgetlabel] at (3.85,2.54)
+    {Remove outgoing points before inserting replacements.};
+  \node[pcbudgetlabel] at (11.95,2.54)
+    {Both fading sets count toward the same budget.};
+
+  % Each ten-cell bar is a schematic partition of B slots, not a data value.
+  % The MVP draws nine retained cells and one replacement cell.
+  \foreach \k in {0,...,8} {
+    \draw[draw=pcKnownLine,fill=pcKnownFill,line width=.45pt]
+      ({.35+.70*\k},1.45) rectangle ({1.05+.70*\k},1.94);
+  }
+  \draw[draw=pcTestLine,fill=pcTestFill,line width=.6pt]
+    (6.65,1.45) rectangle (7.35,1.94);
+  \node[pcbudgetlabel] at (3.50,1.69) {retained};
+  \node[pcbudgetlabel] at (7.00,1.69) {new};
+  \draw[draw=pcKnownLine,line width=.5pt]
+    (.35,2.03) -- (.35,2.16) -- (7.35,2.16) -- (7.35,2.03);
+  \node[pcbudgetlabel,fill=white,inner xsep=3pt] at (3.85,2.16) {$B$ slots};
+  \node[pcbudgetlabel] at (3.85,1.07)
+    {\textbf{Hard count constraint:} $|S_t|\leq B$};
+  \node[pcbudgetlabel] at (3.85,.66)
+    {\textbf{Turnover constraint:} $q_t\leq\rho B$};
+  \node[pcbudgetlabel,text=pcMuted] at (3.85,.27)
+    {$q_t$: swaps per update; initial setting $\rho=0.10$.};
+
+  % Fade allocation: retained + outgoing + incoming use exactly one B-bar.
+  \foreach \k in {0,...,7} {
+    \draw[draw=pcKnownLine,fill=pcKnownFill,line width=.45pt]
+      ({8.45+.70*\k},1.45) rectangle ({9.15+.70*\k},1.94);
+  }
+  \draw[draw=pcTestLine,fill=pcOutgoingFill,line width=.6pt]
+    (14.05,1.45) rectangle (14.75,1.94);
+  \draw[draw=pcTestLine,fill=pcTestFill,line width=.6pt]
+    (14.75,1.45) rectangle (15.45,1.94);
+  \node[pcbudgetlabel] at (11.25,1.69) {$R$};
+  \node[pcbudgetlabel] at (14.40,1.69) {$O$};
+  \node[pcbudgetlabel] at (15.10,1.69) {$I$};
+  \draw[draw=pcKnownLine,line width=.5pt]
+    (8.45,2.03) -- (8.45,2.16) -- (15.45,2.16) -- (15.45,2.03);
+  \node[pcbudgetlabel,fill=white,inner xsep=3pt] at (11.95,2.16) {$B$ slots};
+  \node[pcbudgetlabel] at (11.95,1.07)
+    {\textbf{Hard count constraint:} $R+O+I\leq B$};
+  \node[pcbudgetlabel] at (11.95,.66)
+    {$R$: retained; $O$: outgoing; $I$: incoming.};
+  \node[pcbudgetlabel,text=pcMuted] at (11.95,.27)
+    {Reserve capacity before overlap; no extra 10\% slots.};
+\end{tikzpicture}%
+}
+
+\begin{document}
+\maketitle
+\thispagestyle{plain}
+
+\section*{Background}
+\textbf{GAO, Yuanchen.} \YuanchenBackground
+
+\textbf{ZHOU, Ziyu.} Ziyu contributed to the point-cloud modeling component of MSV-PCT (AAAI 2025)~\cite{wang2025msvpct}, gaining experience with 3D point representations and geometric context modeling for salient-object detection. This background supports the proposed geometry preprocessing and importance-aware allocation, while the WebGL2 renderer and temporal budget controller will be developed for this project.
+
+\section*{Project description}
+We will build an interactive renderer for static PLY/XYZ point clouds that preserves geometric detail and limits visible changes as the camera moves. Each point becomes an oriented surface element (surfel) with a normal and support radius; no triangle reconstruction is required. The viewer will expose a fixed point budget, method switches and repeatable camera paths. Our question is whether geometry and a simple visual-saliency proxy, combined with temporally constrained selection, improve the balance between image quality, flicker and responsiveness at the same budget.
+
+Our foundation is established work: surface splatting provides point-based surface rendering~\cite{zwicker2001}, and Potree already provides hierarchical browser-based point-cloud visualization~\cite{potree2016}. Saliency-guided simplification~\cite{leal2021} and saliency-dependent mesh LOD~\cite{barni2009} also predate this project. Most directly, Sch\"utz et al. already reduce point-cloud LOD popping through continuous, point-wise density changes~\cite{clod2019}. Thus, neither adaptive sampling nor smoother LOD transitions alone constitute our contribution.
+
+Our proposed contribution is a \emph{budget-constrained selection policy and its controlled evaluation}: combine geometric importance with offline color contrast, retain useful points through persistent IDs and hysteresis, and limit discretionary replacements. Unlike the distance/view-driven CLOD formulation~\cite{clod2019}, we will investigate how these importance cues interact with explicit count and replacement limits in a CPU/WebGL2 implementation. This is a course-scale design and empirical contribution; improvements remain hypotheses. The core scope excludes dynamic clouds, neural-model training and GPU hierarchy traversal.
+
+\begin{figure}[htbp]
+  \centering
+  \IfFileExists{assets/proposal_pipeline.pdf}{\includegraphics[width=\linewidth]{assets/proposal_pipeline.pdf}}{\PipelineDiagram}
+  \caption{Proposed system, not an experimental result. The highlighted selector is the component to design and evaluate; hierarchy construction, surfels and depth enhancement build on existing techniques. The feedback path preserves selection state between selection updates.}
+  \label{fig:pipeline}
+\end{figure}
+
+
+
+\clearpage
+\section*{Key challenges}
+\begin{itemize}
+\item \textbf{Stability versus adaptation.} Retaining points can suppress popping but delay new detail after a turn or zoom. We will smooth view-dependent scores, use a replacement margin, and cap discretionary swaps. Frustum removals and filling empty slots will be handled separately; abrupt camera cuts reset the selection. We will measure recovery delay as well as temporal error, so freezing a poor point set cannot count as success.
+
+\item \textbf{Budget and coverage.} Selecting only high scores can leave holes in flat regions. A coarse spatial cover will reserve representatives before distributing the remaining budget. The minimum viable product (MVP) will use paired, discrete replacements; a new point takes an old point's slot. Optional cross-fades must count both outgoing and incoming instances within the same cap (Fig.~\ref{fig:budget}).
+
+\item \textbf{Noisy features and GPU cost.} Sparse neighborhoods can corrupt PCA normals and curvature. We will normalize features, reject unreliable estimates and fall back to density-based coverage. Oriented disks will use instanced quads, circular fragment rejection and depth testing; large footprints can still cause expensive overdraw. We will profile CPU selection and GPU rendering separately. Depth-tested point sprites are the fallback, with that renderer held fixed across comparisons.
+
+\item \textbf{Hands-on implementation and AI assistance.} We will implement the feature pipeline, budget/retention controller, GLSL shaders and experiment scripts, using existing libraries for loading, camera controls and neighbor queries. We expect AI assistance with scaffolding, implementation suggestions, debugging and writing; it has also assisted proposal drafting and literature checking. Team members will review, explain and test each core module. A development log will record substantive AI-generated or adapted code, external sources and validation; the final report will disclose their extent. The technical work is the integrated controller and its reproducible ablations, beyond assembling an existing viewer.
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \IfFileExists{assets/proposal_budget.pdf}{\includegraphics[width=\linewidth]{assets/proposal_budget.pdf}}{\BudgetDiagram}
+  \caption{Budget accounting in the proposed design. The hard active-instance limit and the replacement-rate limit serve different purposes. A 10\% initial quota per selection update is a tunable setting, not additional rendering capacity or a measured optimum.}
+  \label{fig:budget}
+\end{figure}
+
+\section*{Timeline}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}p{0.13\linewidth}p{0.25\linewidth}Y@{}}
+\toprule
+\textbf{Week} & \textbf{Milestone} & \textbf{Details / tasks}\\
+\midrule
+1 & Proposal: Sep 29 (A2) & Freeze scope, baseline definitions, datasets and evaluation protocol.\\
+2--3 & Baseline and geometry & Loader, fixed camera paths, full-point reference; octree, normals, radii and IDs.\\
+4--5 & Progress: Oct 25 (A3) & Geometry LOD, first GPU surfels, feature diagnostics and budget checks.\\
+6--7 & Selection and stability & Color contrast, smoothing, hysteresis and paired swaps; integration and profiling.\\
+8--9 & Demo: Nov 22 (A4) & Ablations, camera-motion tests, sensitivity analysis and recorded comparisons.\\
+10 & Final: Nov 27 (A5) & Report, documented code, reproducible runs and AI/source-use record.\\
+\bottomrule
+\end{tabularx}
+\normalsize
+
+\clearpage
+\section*{Design and implementation details}
+\textbf{Representation and selection.}
+Offline Python preprocessing will estimate normals, spacing-based radii and geometric variation, build an octree, and attach stable source-point IDs. The browser will use JavaScript/TypeScript and WebGL2. CPU frustum traversal and bounded node candidate lists will avoid sorting the entire input every frame; parent/child representatives will be deduplicated by ID. A coarse visible partition will be chosen to fit within the budget before allocating extra samples.
+
+For candidate $i$, let $e_i(t)$ be projected support size and $g_i$ a normalized PCA/normal-variation score. We define a separate saliency proxy $s_i$ as normalized center--surround color contrast, averaging $\|\mathbf c_i-\operatorname{mean}_{j\in\mathcal N_r(i)}\mathbf c_j\|_2$ over two neighborhood radii in linear RGB. It is an offline appearance heuristic, not a validated predictor of human attention; for uncolored data $s_i=0$. An initial importance rule is
+\begin{equation}
+ a_i(t)=e_i(t)\bigl[1+w_g g_i+w_s s_i+w_v b_i(t)\bigr],
+ \qquad b_i(t)=1-|\mathbf n_i\cdot\mathbf v_i(t)|,
+ \label{eq:score}
+\end{equation}
+where $b_i$ is only a silhouette \emph{proxy}, and $\mathbf v_i$ is the unit viewing direction. We will clamp/normalize the inputs and fix weights after a separate development sequence. Persistent IDs allow exponential smoothing with a time-based decay and deterministic tie-breaking. A challenger replaces a retained point only if its smoothed score exceeds the retained score by a margin. At a fixed 30~Hz selection update, the initial discretionary quota is $q=\lfloor0.1B\rfloor$ paired swaps; initialization and compulsory visibility changes are logged separately. At all times, actual submitted instances satisfy $N_t\le B$.
+
+\textbf{Rendering and reuse.}
+Our opaque oriented-disk renderer is a simplified implementation inspired by surface splatting~\cite{zwicker2001}, rather than a reproduction of its full EWA filtering. Eye-Dome Lighting (EDL)~\cite{edl2011} is optional depth-based post-processing. All variants will share footprint rules, depth handling and shading parameters, including EDL-off checks. Potree is a reference system, not a claimed implementation of our selector; any reused code will be identified with its source and license.
+
+\textbf{Data and comparisons.}
+We will use Stanford Bunny/Dragon geometry~\cite{stanford}, the colored PLY clouds distributed for Open3D's colored-ICP example~\cite{open3ddata}, and a synthetic surface with thin features and color patches. Each colored scan is rendered independently; registration is outside scope. Mesh-derived Stanford inputs will be labeled as such, rather than treated as raw scans. Tests will replay orbit, zoom, slow boundary crossing and abrupt-view-change paths at a fixed viewport, with budgets of 5\%, 10\% and 20\% of input size. The full-point image uses the same renderer and is a reference, not ground truth.
+
+We will compare uniform spatial sampling, screen-size-only LOD, geometry-only selection, and geometry-plus-saliency selection. The adaptive variants will each run with temporal control on and off; comparing geometry-only and full selection with the same controller isolates the saliency term. All variants share the input, hierarchy, budget, camera poses and rendering settings. With sufficient common candidates, each method fills exactly $B$ slots using the same coverage/fill policy; otherwise all use the same candidate-limited count. A distance-only gradual-transition adaptation of CLOD~\cite{clod2019} is an extension if time permits and will be labeled as an adaptation, not a full reproduction. The core comparisons will support conclusions about our components, not superiority over all existing systems.
+
+\textbf{Measurements and success criteria.}
+We will report RGB error, depth error on valid correspondences, foreground holes and silhouette disagreement. For temporal error, define residual $E_t=I_t^B-R_t$ between budgeted and full-point images. We will measure
+\begin{equation}
+ T=\operatorname{mean}_{t,\,p\in M_t}
+ \bigl\|E_t(p)-W_{t-1\rightarrow t}(E_{t-1})(p)\bigr\|_1.
+ \label{eq:temporal}
+\end{equation}
+Here $W$ uses known camera poses and reference depth; $M_t$ retains only in-bounds, depth-consistent correspondences visible in both reference frames. It excludes disocclusions independently of each method's holes. ID turnover and recovery time after a view change will complement $T$. Performance reports will include median/95th-percentile frame and selection times, available GPU timings, buffer memory, and actual point counts on a stated device/browser. Success means a working reproducible viewer and a measured quality--stability--latency trade-off; the desired outcome is lower temporal error without unacceptable loss of detail or responsiveness. Parameter sweeps and failure cases will be reported even if the saliency term provides no benefit.
+
+\clearpage
+\begin{thebibliography}{9}
+\small\setlength{\itemsep}{0.25em}
+\bibitem{wang2025msvpct}
+Z. Wang, Y. Huang, G. Lyu, Y. Zhao, Z. Zhou, B. Xie, Z. Yang, and Y. Deng.
+MSV-PCT: Multi-Sparse-View Enhanced Transformer Framework for Salient Object Detection in Point Clouds.
+\emph{Proceedings of the AAAI Conference on Artificial Intelligence}, 39(8):8268--8276, 2025.
+\href{https://doi.org/10.1609/aaai.v39i8.32892}{doi:10.1609/aaai.v39i8.32892}.
+\bibitem{zwicker2001}
+M. Zwicker, H. Pfister, J. van Baar, and M. Gross.
+Surface splatting. In \emph{SIGGRAPH}, pp. 371--378, 2001.
+\href{https://doi.org/10.1145/383259.383300}{doi:10.1145/383259.383300}.
+\bibitem{potree2016}
+M. Sch\"utz. \emph{Potree: Rendering Large Point Clouds in Web Browsers}.
+Master's thesis, TU Wien, 2016.
+\href{https://www.cg.tuwien.ac.at/research/publications/2016/SCHUETZ-2016-POT/}{TU Wien publication record}.
+\bibitem{leal2021}
+E. Leal, G. Sanchez-Torres, J. W. Branch-Bedoya, F. Abad, and N. Leal.
+A saliency-based sparse representation method for point cloud simplification.
+\emph{Sensors}, 21(13):4279, 2021.
+\href{https://doi.org/10.3390/s21134279}{doi:10.3390/s21134279}.
+\bibitem{barni2009}
+R. Barni, J. Comba, and A. Varshney.
+Salient clustering for view-dependent multiresolution rendering.
+In \emph{SIBGRAPI}, pp. 56--63, 2009.
+\href{https://doi.org/10.1109/SIBGRAPI.2009.34}{doi:10.1109/SIBGRAPI.2009.34}.
+\bibitem{clod2019}
+M. Sch\"utz, K. Kr\"osl, and M. Wimmer.
+Real-time continuous level of detail rendering of point clouds.
+In \emph{IEEE VR}, pp. 103--110, 2019.
+\href{https://doi.org/10.1109/VR.2019.8798284}{doi:10.1109/VR.2019.8798284}.
+\bibitem{edl2011}
+C. Boucheny and A. Ribes.
+Eye-Dome Lighting: a non-photorealistic shading technique.
+Kitware, April 15, 2011.
+\href{https://www.kitware.com/eye-dome-lighting-a-non-photorealistic-shading-technique/}{Author technical article}.
+\bibitem{stanford}
+Stanford Computer Graphics Laboratory.
+\emph{The Stanford 3D Scanning Repository}.
+\url{https://graphics.stanford.edu/data/3Dscanrep/}. Accessed September 28, 2026.
+\bibitem{open3ddata}
+Open3D. \emph{Colored point cloud registration}, documentation and
+\texttt{DemoColoredICPPointClouds} data.
+\href{https://www.open3d.org/docs/release/tutorial/pipelines/colored_pointcloud_registration.html}{Official tutorial and data download}. Accessed September 28, 2026.
+\end{thebibliography}
+\end{document}
