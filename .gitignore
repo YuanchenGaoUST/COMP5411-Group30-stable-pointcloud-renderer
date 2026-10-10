@@ -1,0 +1,15 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.env
+.env.*
+!.env.example
+data/raw/*
+!data/raw/.gitkeep
+results/local/
+work/
+data/sources/*
+!data/sources/README.md
+!data/sources/teapot-license-info.js

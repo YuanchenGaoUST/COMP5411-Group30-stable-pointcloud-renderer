@@ -1,0 +1,16 @@
+{
+  "name": "comp5411-stable-pointcloud-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "COMP5411 research prototype: budgeted temporally stable surfel rendering",
+  "scripts": {
+    "dev": "python3 scripts/serve.py",
+    "test": "node --test tests/*.test.mjs",
+    "test:python": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "test:browser": "node scripts/browser-smoke.mjs results/local/browser",
+    "test:catalog": "node scripts/catalog-browser-smoke.mjs results/local/catalog",
+    "benchmark": "node scripts/benchmark-selection.mjs"
+  },
+  "engines": {"node": ">=20"}
+}

@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "title": "COMP5411 point-cloud evaluation protocol",
+  "status": "planned_not_run",
+  "created": "2026-10-10",
+  "scope": "A reproducible experiment plan. This file contains no measured results and is not evidence that the experiment matrix has been run.",
+  "seed": 20261010,
+  "reproducibility": {
+    "cameraTime": "Use frameIndex / samplingFps, never wall-clock animation time.",
+    "selection": "Use persistent source IDs and deterministic seed 20261010; reset selector state before every sequence.",
+    "noise": "Gaussian displacement keyed to persistent source ID and seed 20261010; standard deviation is a fraction of original longest bounding-box extent. Recompute neighborhood features after noise.",
+    "archive": ["dataset hash and source license", "preprocessing command and metadata", "source revision", "seed", "settings JSON", "viewport size", "browser and OS", "CPU and GPU", "frame-level measurements"],
+    "runOrder": "Deterministically shuffle configuration order with seed 20261010, repeat the same order within each paired reference/budget comparison.",
+    "reference": "Render every source surfel with identical camera, radius policy, EDL setting, lighting, projection, and viewport. A full-point render is an internal renderer reference, not ground-truth reconstructed geometry."
+  },
+  "datasetFamilies": [
+    {
+      "id": "synthetic-analytic-mixed",
+      "availability": "implemented generator; experiment runs planned",
+      "source": "src/core/cloud.js:createDemoCloud",
+      "pointCounts": [14400, 57600, 100000],
+      "seed": 20261010,
+      "features": ["curved ellipsoid and torus", "sharp box edges", "thin tubes", "color annotation patches", "multiple depths and occlusion boundaries"],
+      "featureProvenance": "Analytical normals and designed feature proxies. Geometry and saliency proxies must not be presented as measured PCA curvature or validated perceptual saliency."
+    },
+    {
+      "id": "synthetic-neighborhood-fixture",
+      "availability": "implemented fixture generator; experiment runs planned",
+      "source": "scripts/generate_fixture.py",
+      "artifact": "data/fixture.json",
+      "pointCounts": [8192, 32768],
+      "preprocess": { "neighbors": 24, "outerNeighbors": 72, "seed": 20261010, "backend": "auto", "numpyMaxPoints": 16000, "largerCountRequirement": "32768-point fixture requires optional SciPy; NumPy fallback accepts at most 16000 points." },
+      "features": ["overlapping planes", "small color patches", "sphere", "thin ribbon", "slender cylinder"],
+      "featureProvenance": "Use computed neighborhood features; retain original source IDs for paired noise and selection comparisons."
+    },
+    {
+      "id": "density-imbalanced-static",
+      "availability": "planned derived datasets; not generated or evaluated by this plan",
+      "source": "Deterministic persistent-ID thinning of the neighborhood fixture",
+      "regionalDensityRatios": [1, 4, 16],
+      "seed": 20261010,
+      "purpose": "Check whether high-density flat regions suppress thin or sparse features under a fixed selection budget."
+    },
+    {
+      "id": "real-static-scan",
+      "availability": "planned external dataset; no scan bundled or evaluated by this plan",
+      "requirements": ["documented license", "static geometry", "persistent IDs", "visible sharp and thin features", "documented downsampling to the 100000-point interactive limit"],
+      "purpose": "Test generalization beyond designed synthetic feature proxies."
+    }
+  ],
+  "methods": [
+    { "id": "uniform", "description": "Deterministic uniform baseline", "stabilityVariants": [false] },
+    { "id": "screen", "description": "Projected-area and screen-coverage allocation", "stabilityVariants": [false, true] },
+    { "id": "geometry", "description": "Screen coverage plus geometry-detail allocation", "stabilityVariants": [false, true] },
+    { "id": "full", "description": "Screen coverage, geometry, saliency and confidence allocation", "stabilityVariants": [false, true] }
+  ],
+  "budgets": {
+    "ratios": [0.05, 0.10, 0.20],
+    "rule": "K = min(N, max(1, floor(ratio * N))). Use the identical K for all methods on the same source cloud and count every selected surfel against the budget.",
+    "record": ["requested K", "selected count", "actually drawn count", "source N"]
+  },
+  "camera": {
+    "module": "src/core/camera-paths.js",
+    "durationSeconds": 12,
+    "samplingFps": 30,
+    "frameCount": 361,
+    "normalization": "Application cameras use sceneScale = bounds.radius / 1.7, then add bounds.center to both eye and target. bounds.radius is half the bounding-box diagonal. Record this scale per cloud; Python preprocessing produces longest extent 1, so its radius and scale differ from the analytical demo scene.",
+    "developmentPaths": ["orbit", "zoom"],
+    "heldOutPaths": ["boundary", "cut"],
+    "heldOutPolicy": "Choose weights, stability settings, depth tolerance and display settings using development paths only. Freeze them before inspecting held-out outcomes.",
+    "cutTimeSeconds": 6,
+    "cutPolicy": "Pass previousTime to cameraAt, reset selection history at a camera cut, and pass cut:true to temporalResidualMetric for the crossing pair. Report first-frame cut quality and post-cut recovery separately."
+  },
+  "renderSettings": {
+    "viewport": [640, 480],
+    "referenceAndBudgetMustMatch": ["surfel radius policy", "light direction", "EDL setting", "background color", "view-projection matrix", "near/far clipping"],
+    "primaryEDL": true,
+    "EDLAblation": [false, true],
+    "imageCapture": "Capture RGBA after EDL whenever it is enabled; capture the matching raw depth buffer before postprocessing. Store arrays in gl.readPixels bottom-left row order."
+  },
+  "sweeps": [
+    {
+      "id": "stability-ablation",
+      "methods": ["screen", "geometry", "full"],
+      "stability": [false, true],
+      "budgets": [0.05, 0.10, 0.20],
+      "purpose": "Isolate stabilization at identical budgets, camera samples, and image quality settings. Uniform selection remains deterministic and has no temporal state."
+    },
+    {
+      "id": "geometry-noise",
+      "datasetFamilies": ["synthetic-neighborhood-fixture", "real-static-scan"],
+      "noiseStdFractions": [0, 0.001, 0.005, 0.01],
+      "seed": 20261010,
+      "recomputeFeatures": true,
+      "pairedReference": "Render the full density of the same noisy cloud, avoiding conflation of sampling error and geometric corruption.",
+      "purpose": "Measure whether confidence-aware allocation remains useful when neighborhood normals and local geometry are uncertain."
+    }
+  ],
+  "metrics": {
+    "module": "src/core/metrics.js",
+    "maeRgb": { "units": "normalized byte RGB; [0,1]", "aggregation": "All pixels and three RGB channels; alpha ignored." },
+    "foregroundHoleRate": { "units": "fraction", "aggregation": "Reference foreground with budget background / reference foreground. Raw depth < 1 defines foreground." },
+    "silhouetteMismatchRate": { "units": "fraction", "aggregation": "Foreground-mask symmetric difference / foreground union." },
+    "depthCorrespondenceError": { "units": "raw WebGL depth, nonlinear [0,1]", "aggregation": "Mean absolute depth difference at shared foreground pixels. Always report correspondence coverage alongside it; holes are measured separately." },
+    "temporalResidualRgb": {
+      "units": "normalized RGB residual difference; [0,2]",
+      "definition": "E_t = budgetRGBA_t - referenceRGBA_t. Mean absolute E_t - reproject(E_previous) across RGB channels.",
+      "reprojection": "Unproject current reference pixel centers using raw depth and inverse current column-major view-projection; project into previous reference and sample nearest neighbor.",
+      "mask": "Both-frame reference foreground, previous projection in bounds and in front, absolute raw-depth correspondence difference <= depthTolerance. Budget holes never exclude pixels.",
+      "depthTolerance": 0.0001,
+      "emptyMask": "Return null, never substitute zero; report validPixelCount and validPixelFraction.",
+      "limitation": "Nearest-neighbor reprojection has subpixel sampling error; depth tolerance is camera-range-dependent and must be fixed and disclosed."
+    },
+    "selectionTurnover": { "units": "fraction", "aggregation": "1 - |S_t intersect S_previous| / |S_t union S_previous| on persistent IDs; retain counts and exclude camera-cut crossings." },
+    "performance": {
+      "record": ["CPU selection milliseconds", "render submission milliseconds", "GPU render milliseconds when timer query supported", "frame rate", "estimated allocated CPU and GPU bytes"],
+      "timing": "Separate rendering from image readback, synchronous quality comparison, and file export. A CPU submission time is not GPU render time.",
+      "warmupFrames": 60,
+      "repeats": 3,
+      "statistics": ["median", "p95", "per-run results"],
+      "gpuUnsupported": "Report unavailable; do not substitute CPU timing as a GPU measurement."
+    }
+  },
+  "reporting": {
+    "sequenceSummary": "Report image means per sequence and temporal mean weighted by valid correspondence counts. Retain per-frame values, null masks, worst image frames, and cut diagnostics.",
+    "comparison": "Pair methods by dataset, budget, path, noise, EDL setting and seed. Show quality/performance tradeoffs; no superiority claims without measured support.",
+    "separateEvidence": "Browser smoke checks and small validation sequences demonstrate implementation behavior only. They do not count as completion of this planned dataset/method/path matrix.",
+    "remainingWork": "Generate and archive all planned datasets, acquire a licensed real scan, freeze development settings, execute the matrix, and analyze held-out results."
+  }
+}
