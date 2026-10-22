@@ -1,0 +1,26 @@
+{
+  "generated": "2026-10-22",
+  "method": "Built-in image_gen tool; no CLI/API fallback",
+  "purpose": "Decorative presentation backgrounds, not model renders or measured experimental results",
+  "display": "Fixed 2D backplates with centered cover crop; no environment lighting, parallax or cast shadows",
+  "assets": [
+    {
+      "id": "studio",
+      "file": "studio.jpg",
+      "prompt": "Use case: product-mockup. Asset type: empty background plate for an interactive 3D point-cloud viewer, wide landscape 16:9. Primary request: a tasteful pale cool-grey photography studio cyclorama, seamless gently curved floor to backdrop, soft atmospheric falloff, subtle matte texture, refined and quiet. Absolutely empty: no aircraft, no product, no model, no people, no props, no text, no logo, no watermark, no graphic frame. The central 70 percent must be clean low-detail negative space for a separately rendered white aircraft or object. Medium silver-grey tonal values around the center so a white model will remain legible. Broad diffuse studio illumination, no bright hotspot, no object-shaped shadow. Camera straight ahead, very gentle floor transition confined to bottom quarter. Produce the background only, edge to edge, photorealistic.",
+      "postprocessing": "JPEG format conversion at quality 88; no content edits"
+    },
+    {
+      "id": "sky",
+      "file": "sky.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: empty sky background plate for an interactive 3D point-cloud viewer, wide landscape 16:9. Primary request: elegant clear blue daytime sky with softly atmospheric distant clouds confined to the bottom fifth and outer edges, airy pale horizon, slightly deeper desaturated blue toward top. Central 70 percent open unobstructed sky, low detail and no clouds directly at center, to composite a separately rendered white airplane. Background only: no aircraft, no objects, no birds, no sun disk, no sun rays, no buildings, no land, no text, no logos, no watermark, no frame. Natural soft daylight, photographic and restrained, not a dramatic poster. Edge to edge.",
+      "postprocessing": "JPEG format conversion at quality 88; no content edits"
+    },
+    {
+      "id": "technical",
+      "file": "technical.jpg",
+      "prompt": "Use case: stylized-concept. Asset type: empty background plate for an interactive scientific 3D point-cloud viewer, wide landscape 16:9. Primary request: a refined deep slate-blue technical studio environment, atmospheric blue-grey backdrop, very faint receding floor grid only in the bottom quarter, a calm subtle cyan-grey ambient glow, clean low-detail open central 70 percent for a separately rendered 3D object. Keep the scene visibly blue-grey, not pure black. Sophisticated restrained computer graphics laboratory presentation aesthetic, no neon spectacle. Background only: no object, no airplane, no model, no point cloud, no silhouette, no product shadow, no UI, no graphs, no labels, no text, no logo, no watermark, no frame. Broad diffuse illumination and smooth gradients. Edge to edge.",
+      "postprocessing": "JPEG format conversion at quality 88; no content edits"
+    }
+  ]
+}

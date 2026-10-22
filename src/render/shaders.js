@@ -37,6 +37,9 @@ in vec3 vColor;
 in float vGeometry;
 in float vSaliency;
 uniform int uColorMode;
+uniform vec3 uLightDirection;
+uniform float uAmbientLight;
+uniform float uSunStrength;
 layout(location=0) out vec4 outColor;
 layout(location=1) out vec4 outDepth;
 void main() {
@@ -44,7 +47,7 @@ void main() {
   vec3 base=vColor;
   if(uColorMode==1) base=mix(vec3(.05,.4,.7),vec3(1.,.63,.16),clamp(vGeometry,0.,1.));
   if(uColorMode==2) base=mix(vec3(.05,.4,.7),vec3(1.,.63,.16),clamp(vSaliency,0.,1.));
-  float light=.42+.58*abs(dot(normalize(vNormal),normalize(vec3(.4,.8,.65))));
+  float light=uAmbientLight+uSunStrength*abs(dot(normalize(vNormal),normalize(uLightDirection)));
   outColor=vec4(base*light,1.);
   // Store raw depth in an RGBA8 attachment for portable readPixels.
   float d=floor(gl_FragCoord.z*16777215.0+.5);
@@ -74,4 +77,20 @@ void main(){
     if(neighbor<.999999) response+=max(0.,center-log(max(viewDepth(neighbor),1e-6)));
   }
   outColor=vec4(c.rgb*exp(-response*14.),c.a);
+}`;
+
+// This pass only writes to the visible canvas. The composed framebuffer remains
+// the original solid-background image used by capture() and evaluation metrics.
+export const DISPLAY_FRAGMENT = `#version 300 es
+precision highp float;
+in vec2 vUV;
+uniform sampler2D uScene;
+uniform sampler2D uBackground;
+uniform vec2 uBackgroundScale;
+out vec4 outColor;
+void main(){
+  vec4 scene=texture(uScene,vUV);
+  vec2 backgroundUV=(vUV-.5)*uBackgroundScale+.5;
+  vec3 background=texture(uBackground,backgroundUV).rgb;
+  outColor=vec4(mix(background,scene.rgb,scene.a),1.);
 }`;
