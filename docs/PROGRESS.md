@@ -30,3 +30,13 @@
 2026-10-10 增加宽体客机、风格化飞机、Stanford Bunny/Dragon、Utah Teapot五种输入，每个15,000点。来源、许可、mesh与processed JSON hashes以及采样seed均已归档。采样后重新计算PCA特征，无颜色模型的saliency=0。
 
 对应的独立测试为33项JavaScript、26项Python，共59项通过；新增模型的浏览器检查记录位于results/validation/catalog。sample_mesh.py已支持ASCII/binary PLY mesh输入，原始点云入口的binary PLY支持仍待补充。
+
+## 2026-10-22 English interface and presentation controls
+
+- Converted viewer controls, messages, and catalog labels to English, and added two English-interface regression tests. All 35 JavaScript and 26 Python tests pass.
+- Added interactive azimuth, elevation, intensity, and reset controls for the existing world-space, two-sided diffuse light. Default lighting is preserved. Lighting changes do not change the point budget or selection, and comparison runs lock and export their lighting settings.
+- Added Soft studio, Open sky, and Blue lab backgrounds alongside Solid / diagnostic. These AI-generated images are fixed 2D display decorations, with full prompts in assets/backgrounds/generation.json. They do not add environment lighting, mesh geometry, shadows, or parallax.
+- Composited image backgrounds only in the final presentation pass. Save frame includes the decoration; diagnostic capture retains the original solid RGB background and depth. Experiment exports distinguish rendering.background from rendering.captureBackground.
+- Kept the existing GPU timer scoped to surfel rendering and EDL. It excludes background presentation and is not a total decorated-view frame-time measurement.
+- Added optional sunlight and background browser integration scripts. Their software-rendered checks cover interaction, diagnostic isolation, metadata, and responsive layout; they are not GPU performance benchmarks.
+- The general, sunlight, and background browser checks all pass with no browser errors. Switching the three image backgrounds preserves offscreen RGB/depth and selected point IDs exactly; paired studio/sky experiments return identical quality metrics. Compact reports are under results/validation/backgrounds-2026-10-22 and results/validation/viewer-design-2026-10-22.

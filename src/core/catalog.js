@@ -15,6 +15,6 @@ export function validateCatalog(data) {
 
 export async function fetchCatalog(fetcher=globalThis.fetch) {
   const response=await fetcher('/data/catalog.json');
-  if(!response.ok)throw new Error('本地模型目录未找到，请运行数据构建脚本。');
+  if(!response.ok)throw new Error('Local model catalog not found. Run the dataset build script.');
   return validateCatalog(await response.json());
 }

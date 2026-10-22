@@ -1,0 +1,118 @@
+{
+  "status": "passed",
+  "assets": [
+    {
+      "id": "studio",
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "sky",
+      "width": 1672,
+      "height": 940
+    },
+    {
+      "id": "technical",
+      "width": 1672,
+      "height": 941
+    }
+  ],
+  "placement": {
+    "aboveCanvas": true,
+    "defaultValue": "studio"
+  },
+  "backgrounds": [
+    {
+      "id": "studio",
+      "note": "Soft studio · AI-generated image · display only",
+      "captureChanges": 0,
+      "depthChanges": 0,
+      "changedBackgroundPixels": 0,
+      "changedForegroundPixels": 0,
+      "foregroundPixels": 42228,
+      "backgroundPixels": 547420,
+      "paletteSize": 989,
+      "sameIds": true,
+      "drawn": 7500,
+      "budget": 7500,
+      "initialized": false,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "sky",
+      "note": "Open sky · AI-generated image · display only",
+      "captureChanges": 0,
+      "depthChanges": 0,
+      "changedBackgroundPixels": 547420,
+      "changedForegroundPixels": 0,
+      "foregroundPixels": 42228,
+      "backgroundPixels": 547420,
+      "paletteSize": 7774,
+      "sameIds": true,
+      "drawn": 7500,
+      "budget": 7500,
+      "initialized": false,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "technical",
+      "note": "Blue lab · AI-generated image · display only",
+      "captureChanges": 0,
+      "depthChanges": 0,
+      "changedBackgroundPixels": 547420,
+      "changedForegroundPixels": 0,
+      "foregroundPixels": 42228,
+      "backgroundPixels": 547420,
+      "paletteSize": 2162,
+      "sameIds": true,
+      "drawn": 7500,
+      "budget": 7500,
+      "initialized": false,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "solid",
+      "note": "Original solid background · also used for image measurements",
+      "captureChanges": 0,
+      "depthChanges": 0,
+      "changedBackgroundPixels": 547420,
+      "changedForegroundPixels": 0,
+      "foregroundPixels": 42228,
+      "backgroundPixels": 547420,
+      "paletteSize": 1,
+      "sameIds": true,
+      "drawn": 7500,
+      "budget": 7500,
+      "initialized": false,
+      "pngMaxDelta": 0
+    }
+  ],
+  "experiment": {
+    "compared": [
+      "studio",
+      "sky"
+    ],
+    "identicalMetricsAndSelections": true,
+    "captureBackground": "legacy-solid",
+    "controlsLocked": true,
+    "drawsPerRun": [
+      12,
+      12
+    ],
+    "recordsPerRun": [
+      2,
+      2
+    ]
+  },
+  "mobile": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "selectorLeft": 177,
+    "selectorRight": 357,
+    "noteLeft": 33,
+    "noteRight": 357,
+    "aboveCanvas": true
+  },
+  "consoleErrors": [],
+  "backend": "headless Chrome / SwiftShader; functionality checks only"
+}

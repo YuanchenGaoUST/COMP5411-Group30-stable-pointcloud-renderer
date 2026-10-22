@@ -31,3 +31,13 @@ Codex 协助检索作者/官方模型页并下载 OBJ/PLY 模型，生成了 sam
 新增数据均为 mesh-derived points，按表面积均匀采样并重新计算 PCA normals/geometry。无原始颜色的五种模型均保留 s=0；显示颜色是统一 pearl-white fallback，不冒充作者纹理。
 
 来源、逐模型许可、SHA256 和采样 seed 见 data/catalog.json、data/models/*.json 的 metadata 及 data/sources/README.md。Stanford 许可是研究使用/免费分发并署名，不能标记为 CC0。
+
+## 2026-10-22 English interface and presentation controls
+
+Codex translated the viewer's controls, status/error messages, and catalog labels into English, and added English-interface regression tests. It also exposed the existing two-sided diffuse light through azimuth, elevation, intensity, and reset controls, connected these controls to shader uniforms, and included fixed lighting settings in experiment exports. These changes do not modify the point-selection algorithm or claim physically accurate solar illumination.
+
+Codex used the built-in image_gen tool to generate the Soft studio, Open sky, and Blue lab backgrounds. They are fixed 2D decorative images, not point-cloud renders, environment lighting, reconstructed geometry, cast shadows, or experimental evidence. The images were converted to JPEG without content edits. Full prompts, intended use, and postprocessing details are preserved in [assets/backgrounds/generation.json](../assets/backgrounds/generation.json).
+
+The renderer composites these images only onto the final canvas. Saved presentation frames include the decoration, but diagnostic RGB/depth capture retains the original solid background. Exported experiment metadata identifies both the display choice and the diagnostic background. The existing GPU timer excludes the additional presentation pass, so it must not be described as total decorated-view rendering time. Browser checks use SwiftShader and do not establish native-GPU performance.
+
+No external rendering library was added. Team members remain responsible for reviewing the AI-assisted code, explaining the rendering and selection algorithms, and verifying any submitted claims.

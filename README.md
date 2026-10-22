@@ -39,7 +39,7 @@ python3 scripts/serve.py --port 5412
 
 The development server binds to `127.0.0.1`. Keep it running while using the viewer; opening `index.html` directly bypasses the local HTTP setup required by its modules and data loading.
 
-中文快速使用：启动后，在左侧“内置点云输入”选择飞机、兔子、龙或茶壶；拖动旋转，滚轮缩放。调整点数预算并播放相机路径，可以观察覆盖率与稳定性的变化。
+The interface is entirely in English. Select an input under **Built-in dataset**, drag to rotate, and scroll to zoom. Change the point budget and play a camera path to inspect coverage and temporal changes.
 
 ## Viewer features
 
@@ -48,6 +48,8 @@ The development server binds to `127.0.0.1`. Keep it running while using the vie
 - Four selection modes: Uniform, Screen, Geometry, and Geometry + color contrast.
 - A hard submitted-instance budget, time-based score smoothing, hysteresis, and a paired replacement quota.
 - Oriented surfel disks or screen-facing point sprites, depth testing, and an EDL-inspired post-pass.
+- Interactive sunlight: world-space azimuth, elevation, and intensity controls beneath the canvas, with a reset to the original lighting.
+- Presentation backgrounds: Soft studio, Open sky, Blue lab, and the original solid diagnostic background.
 - Repeatable orbit, zoom, boundary-crossing, and abrupt-cut camera paths.
 - A full-point reference view, frame export, and short method/stability experiments with JSON output.
 
@@ -77,6 +79,26 @@ Displayed image + reproducible diagnostic measurements
 Each surfel stores a position, normal, support radius, and color. The GPU expands it into a small oriented quad and rejects fragments outside its circular footprint. The quad uses rasterization triangles internally, but the application does not reconstruct triangle connectivity between input points.
 
 The current renderer uses **opaque, depth-tested disks**. It is a simplified point-based renderer rather than a full EWA surface-splatting implementation.
+
+### Interactive sunlight
+
+The **Sunlight** panel beneath the canvas controls a directional light. Drag **Azimuth** to move it around the model, **Elevation** to raise it, or **Intensity** to dim it. **Reset sun** restores the original direction `[0.4, 0.8, 0.65]` and intensity. The light stays fixed in world space as the camera moves.
+
+Shading uses `0.42 + 0.58 * intensity * abs(normal · lightDirection)`, with unit vectors in the dot product and intensity in `[0, 1]`. Ambient fill remains at zero sun intensity. The two-sided diffuse term tolerates flipped PCA normals, so opposite light directions produce the same brightness. This is an interactive shading aid, without cast shadows, sky simulation, or new surface reconstruction.
+
+Light changes do not reset selection or change the point budget, geometry scores, or offline color-contrast features. They do change RGB image measurements. Comparison runs lock the sunlight controls, use the same captured settings for every method and full-point reference, and export those settings under `rendering.sunlight`. Keep lighting fixed for temporal-stability experiments. The default/reset lighting preserves the original rendering formula.
+
+### Presentation backgrounds
+
+Use **Background** above the canvas to choose **Soft studio**, **Open sky**, **Blue lab**, or **Solid / diagnostic**. The three image backgrounds are AI-generated, fixed 2D decorations with a centered cover crop. They do not provide environment lighting, geometry, shadows, or camera parallax. Sunlight remains an independent shading control. Full generation prompts and image provenance are recorded in [assets/backgrounds/generation.json](assets/backgrounds/generation.json).
+
+Background images are composited only onto the final displayed canvas. **Save frame** includes the selected decoration, while `renderer.capture()` and all image-quality measurements retain the exact original solid background and depth. Changing the background does not change point selection, surfel shading, or measured RGB/depth. Comparison runs lock the background selector and record the display choice as `rendering.background`, together with `rendering.captureBackground: "legacy-solid"`, in the exported JSON.
+
+The GPU timer covers surfel rendering and the EDL post-pass; it excludes the final background presentation pass. Its value is not the total cost of drawing the decorated viewer. Software-browser checks establish functionality, not native-GPU performance.
+
+![Viewer with a studio background and interactive sunlight controls](docs/images/viewer-sunlight-backgrounds.png)
+
+*Actual point-cloud render over an AI-generated decorative background. Captured with SwiftShader for functionality review; the displayed timings are not native-GPU benchmarks.*
 
 ### Importance and stable selection
 
@@ -188,7 +210,7 @@ Missing raw-input features are explicitly marked as fallbacks. A successful prev
 
 Short experiments in the viewer:
 
-1. Hold input, budget, camera poses, viewport, shader, radius policy, and EDL settings fixed.
+1. Hold input, budget, camera poses, viewport, shader, radius policy, sunlight, and EDL settings fixed.
 2. Advance all method/stability variants together at 30 Hz.
 3. Share one candidate pool, including the union of visible retained IDs.
 4. Render the full-point reference and budgeted images.
@@ -223,6 +245,8 @@ The analytical scene defaults to seed `5411`; the model catalog and planned expe
 
 Node.js **20+** is needed for JavaScript tests. NumPy is needed for Python tests.
 
+Current suite: 35 JavaScript tests and 26 Python tests, including English-interface regressions.
+
 ~~~sh
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
@@ -240,6 +264,8 @@ npx playwright install chromium
 
 node scripts/browser-smoke.mjs results/local/browser
 node scripts/catalog-browser-smoke.mjs results/local/catalog
+node scripts/sunlight-browser-smoke.mjs results/local/sunlight
+node scripts/background-browser-smoke.mjs results/local/backgrounds
 ~~~
 
 The scripts use the local Playwright package and managed Chromium by default. Optional environment overrides are `PLAYWRIGHT_MODULE`, `CHROME_PATH`, and `PROJECT_URL`.
@@ -266,6 +292,7 @@ data/
   models/                   Bundled processed model point clouds
   fixture.*                 Synthetic neighborhood fixture
   sources/                  Attribution and ignored original-model cache
+assets/backgrounds/         AI-generated display images and generation prompts
 experiments/plan.json        Planned evaluation matrix
 results/validation/         Archived implementation checks
 docs/                       Proposal snapshot, progress, metrics and AI-use record
