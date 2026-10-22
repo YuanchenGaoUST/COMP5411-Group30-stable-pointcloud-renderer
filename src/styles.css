@@ -15,3 +15,9 @@
 .backdrop-toolbar p{font-size:11px;margin:0;line-height:1.5}
 @media(max-width:950px){.backdrop-toolbar{flex-wrap:wrap;gap:8px}.backdrop-toolbar label{width:100%;justify-content:space-between}.backdrop-toolbar select{width:180px}.backdrop-toolbar p{width:100%}}
 .canvas-hint{max-width:calc(100% - 32px);padding:5px 9px;border-radius:5px;color:#edf4fa;background:rgba(13,26,39,.72);border:1px solid rgba(210,229,245,.16)}
+.backdrop-toolbar{display:block}
+.presentation-options{display:flex;align-items:center;gap:12px 28px;flex-wrap:wrap}
+.presentation-options #material{width:240px}
+.presentation-notes{display:flex;gap:5px 20px;flex-wrap:wrap;margin-top:9px}
+.presentation-notes #material-note{color:#adc9cf}
+@media(max-width:950px){.presentation-options{gap:10px}.presentation-options label{width:100%;justify-content:space-between}.presentation-options #material{width:240px;max-width:75%}.presentation-notes{gap:4px}}

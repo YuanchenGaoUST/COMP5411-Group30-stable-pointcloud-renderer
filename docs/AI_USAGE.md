@@ -41,3 +41,9 @@ Codex used the built-in image_gen tool to generate the Soft studio, Open sky, an
 The renderer composites these images only onto the final canvas. Saved presentation frames include the decoration, but diagnostic RGB/depth capture retains the original solid background. Exported experiment metadata identifies both the display choice and the diagnostic background. The existing GPU timer excludes the additional presentation pass, so it must not be described as total decorated-view rendering time. Browser checks use SwiftShader and do not establish native-GPU performance.
 
 No external rendering library was added. Team members remain responsible for reviewing the AI-assisted code, explaining the rendering and selection algorithms, and verifying any submitted claims.
+
+## 2026-10-22 Surface material presentation
+
+Codex implemented artistic blue enamel, copper and jade shader presets with broad Blinn–Phong highlights and softer EDL. The presets are hand-specified shader parameters, not AI-painted output images, recovered source textures or measured physical materials. Auto styling is limited to inputs explicitly marked as lacking source colors. Original rendering and diagnostic colors remain available.
+
+Material styling changes foreground RGB. Quantitative comparisons force Original material and the baseline EDL strength, recording both actual experiment settings and requested presentation settings. Point-cloud data and selection are unchanged. New screenshots are actual renderer output; their existing decorative background remains explicitly AI-generated. The team must review and explain this AI-assisted implementation before submission.

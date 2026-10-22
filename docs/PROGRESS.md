@@ -40,3 +40,10 @@
 - Kept the existing GPU timer scoped to surfel rendering and EDL. It excludes background presentation and is not a total decorated-view frame-time measurement.
 - Added optional sunlight and background browser integration scripts. Their software-rendered checks cover interaction, diagnostic isolation, metadata, and responsive layout; they are not GPU performance benchmarks.
 - The general, sunlight, and background browser checks all pass with no browser errors. Switching the three image backgrounds preserves offscreen RGB/depth and selected point IDs exactly; paired studio/sky experiments return identical quality metrics. Compact reports are under results/validation/backgrounds-2026-10-22 and results/validation/viewer-design-2026-10-22.
+
+## 2026-10-22 Artistic surface materials
+
+- Added Auto / Original / Blue enamel / Warm copper / Jade satin choices above the canvas. Auto selects blue only for inputs explicitly marked as lacking source colors.
+- Applied broad, view-dependent sun highlights and gentler EDL to styled materials. Original and diagnostic rendering remain compatible with the baseline. No point-cloud attributes, point IDs or geometry are modified.
+- Material styling changes foreground RGB; comparison runs force Original and EDL strength 14 and export both actual and requested presentation settings.
+- All 35 JavaScript tests and the material, sunlight and general browser checks pass. The new material check confirms unchanged depth, uploaded point attributes and point IDs, visible highlights, identical controlled experiment metrics, PNG export and mobile layout. Evidence: results/validation/materials-2026-10-22/material-smoke.json. Software timings are not native-GPU performance results.
