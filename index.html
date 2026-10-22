@@ -11,7 +11,13 @@
     </aside>
     <div class="workspace">
       <div class="view-header"><div><strong id="scene-name">Loading…</strong><span id="feature-note"></span></div><span class="live-dot">LIVE WEBGL2</span></div>
-      <div class="backdrop-toolbar"><label for="background">Background<select id="background" aria-describedby="background-note"><option value="studio" selected>Soft studio</option><option value="sky">Open sky</option><option value="technical">Blue lab</option><option value="solid">Solid / diagnostic</option></select></label><p id="background-note">Loading backdrop…</p></div>
+      <div class="backdrop-toolbar">
+        <div class="presentation-options">
+          <label for="background">Background<select id="background" aria-describedby="background-note"><option value="studio" selected>Soft studio</option><option value="sky">Open sky</option><option value="technical">Blue lab</option><option value="solid">Solid / diagnostic</option></select></label>
+          <label for="material">Material<select id="material" aria-describedby="material-note"><option value="auto" selected>Auto / preserve source colors</option><option value="original">Original / input colors</option><option value="azure">Blue enamel</option><option value="copper">Warm copper</option><option value="jade">Jade satin</option></select></label>
+        </div>
+        <div class="presentation-notes"><p id="background-note">Loading backdrop…</p><p id="material-note"></p></div>
+      </div>
       <div class="canvas-wrap"><canvas id="viewport" aria-label="Interactive point cloud renderer"></canvas><div class="canvas-hint">Drag to rotate · Scroll to zoom · Double-click to reset</div></div>
       <section class="sunlight-panel" aria-labelledby="sunlight-title">
         <div class="sunlight-heading"><h2 id="sunlight-title">Sunlight</h2><span class="muted">Two-sided diffuse lighting · No cast shadows</span></div>

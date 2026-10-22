@@ -88,6 +88,18 @@ Shading uses `0.42 + 0.58 * intensity * abs(normal · lightDirection)`, with uni
 
 Light changes do not reset selection or change the point budget, geometry scores, or offline color-contrast features. They do change RGB image measurements. Comparison runs lock the sunlight controls, use the same captured settings for every method and full-point reference, and export those settings under `rendering.sunlight`. Keep lighting fixed for temporal-stability experiments. The default/reset lighting preserves the original rendering formula.
 
+### Surface materials
+
+Use **Material** above the canvas to choose **Auto**, **Original / input colors**, **Blue enamel**, **Warm copper**, or **Jade satin**. Auto uses blue enamel only when an input explicitly reports `metadata.hasColors === false`; colored or unknown-color inputs keep Original. An explicit material choice remains selected when switching datasets.
+
+The three artistic presets add a base tint, broad view-dependent sun highlights, and softer EDL depth shading (strengths 4, 4.5, and 3.5 respectively, versus the original 14). They use a simple two-sided diffuse / Blinn–Phong shader, not recovered textures, physically measured materials, or environment reflections. Geometry and color-contrast diagnostic views bypass the presets. Point positions, normals, radii, input colors, feature scores, IDs, and budgets are unchanged. Sparse coverage and surfel boundaries can still be visible.
+
+Material styling changes foreground RGB in both the displayed image and `renderer.capture()`. To preserve the existing comparison protocol, **Run budget comparison** always uses **Original material with EDL strength 14** (when EDL is enabled), and locks the controls during the run. The JSON records actual measurement settings under `rendering` and requested viewer styling under `presentationRendering`. Sunlight and the other controls retain their existing fixed-per-run behavior. The chosen material is restored automatically for live viewing afterward.
+
+![Actual aircraft point cloud with blue enamel material](docs/images/viewer-materials.png)
+
+*Same point-cloud geometry and 7,500-point budget, with artistic surface shading and an AI-generated backdrop. This software-rendered preview is not a GPU performance benchmark.*
+
 ### Presentation backgrounds
 
 Use **Background** above the canvas to choose **Soft studio**, **Open sky**, **Blue lab**, or **Solid / diagnostic**. The three image backgrounds are AI-generated, fixed 2D decorations with a centered cover crop. They do not provide environment lighting, geometry, shadows, or camera parallax. Sunlight remains an independent shading control. Full generation prompts and image provenance are recorded in [assets/backgrounds/generation.json](assets/backgrounds/generation.json).
@@ -95,10 +107,6 @@ Use **Background** above the canvas to choose **Soft studio**, **Open sky**, **B
 Background images are composited only onto the final displayed canvas. **Save frame** includes the selected decoration, while `renderer.capture()` and all image-quality measurements retain the exact original solid background and depth. Changing the background does not change point selection, surfel shading, or measured RGB/depth. Comparison runs lock the background selector and record the display choice as `rendering.background`, together with `rendering.captureBackground: "legacy-solid"`, in the exported JSON.
 
 The GPU timer covers surfel rendering and the EDL post-pass; it excludes the final background presentation pass. Its value is not the total cost of drawing the decorated viewer. Software-browser checks establish functionality, not native-GPU performance.
-
-![Viewer with a studio background and interactive sunlight controls](docs/images/viewer-sunlight-backgrounds.png)
-
-*Actual point-cloud render over an AI-generated decorative background. Captured with SwiftShader for functionality review; the displayed timings are not native-GPU benchmarks.*
 
 ### Importance and stable selection
 
@@ -266,6 +274,7 @@ node scripts/browser-smoke.mjs results/local/browser
 node scripts/catalog-browser-smoke.mjs results/local/catalog
 node scripts/sunlight-browser-smoke.mjs results/local/sunlight
 node scripts/background-browser-smoke.mjs results/local/backgrounds
+node scripts/material-browser-smoke.mjs results/local/materials
 ~~~
 
 The scripts use the local Playwright package and managed Chromium by default. Optional environment overrides are `PLAYWRIGHT_MODULE`, `CHROME_PATH`, and `PROJECT_URL`.

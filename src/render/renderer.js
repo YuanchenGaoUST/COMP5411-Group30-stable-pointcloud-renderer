@@ -1,6 +1,7 @@
 import {SURFEL_VERTEX,SURFEL_FRAGMENT,POST_VERTEX,POST_FRAGMENT,DISPLAY_FRAGMENT} from './shaders.js';
 import {DEFAULT_LIGHTING} from './lighting.js';
 import {BACKGROUNDS} from './backgrounds.js';
+import {ORIGINAL_MATERIAL} from './materials.js';
 
 function program(gl,vs,fs){
   const shader=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;};
@@ -78,7 +79,7 @@ export class SurfelRenderer {
     });
     return entry.promise;
   }
-  draw(camera,{radiusScale=1.8,pointMode=false,colorMode=0,edl=true,present=true,sunlight=DEFAULT_LIGHTING,background='solid'}={}){
+  draw(camera,{radiusScale=1.8,pointMode=false,colorMode=0,edl=true,present=true,sunlight=DEFAULT_LIGHTING,background='solid',material=ORIGINAL_MATERIAL,edlStrength=14}={}){
     const gl=this.gl,t=this.targets;
     this.pollTimers();let query=null;
     if(this.timerEnabled&&this.timerExt&&this.pendingQueries.length<8){query=gl.createQuery();gl.beginQuery(this.timerExt.TIME_ELAPSED_EXT,query);}
@@ -88,10 +89,17 @@ export class SurfelRenderer {
     gl.uniformMatrix4fv(gl.getUniformLocation(this.surfel,'uViewProjection'),false,camera.viewProjection);gl.uniformMatrix4fv(gl.getUniformLocation(this.surfel,'uView'),false,camera.view);
     gl.uniform1f(gl.getUniformLocation(this.surfel,'uRadiusScale'),radiusScale);gl.uniform1i(gl.getUniformLocation(this.surfel,'uPointMode'),pointMode?1:0);gl.uniform1i(gl.getUniformLocation(this.surfel,'uColorMode'),colorMode);
     gl.uniform3fv(gl.getUniformLocation(this.surfel,'uLightDirection'),sunlight.direction);gl.uniform1f(gl.getUniformLocation(this.surfel,'uAmbientLight'),sunlight.ambient);gl.uniform1f(gl.getUniformLocation(this.surfel,'uSunStrength'),sunlight.diffuse*sunlight.intensity);
+    // Material choices only shade existing fragments. Input features, geometry,
+    // instance count and packed depth are unchanged; diagnostics stay original.
+    gl.uniform1i(gl.getUniformLocation(this.surfel,'uStyledMaterial'),colorMode===0&&material.id!=='original'?1:0);
+    gl.uniform3fv(gl.getUniformLocation(this.surfel,'uCameraPosition'),camera.position||camera.eye||[0,0,0]);
+    gl.uniform3fv(gl.getUniformLocation(this.surfel,'uMaterialBaseColor'),material.baseColor);gl.uniform3fv(gl.getUniformLocation(this.surfel,'uMaterialSpecularColor'),material.specularColor);
+    gl.uniform1f(gl.getUniformLocation(this.surfel,'uMaterialSpecularStrength'),material.specularStrength);gl.uniform1f(gl.getUniformLocation(this.surfel,'uMaterialExponent'),material.exponent);
     gl.drawArraysInstanced(gl.TRIANGLES,0,6,this.count);
     gl.bindFramebuffer(gl.FRAMEBUFFER,t.composed);gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.postVAO);gl.useProgram(this.post);
     gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,t.textures.color);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,t.textures.depth);
-    gl.uniform1i(gl.getUniformLocation(this.post,'uColor'),0);gl.uniform1i(gl.getUniformLocation(this.post,'uDepth'),1);gl.uniform2f(gl.getUniformLocation(this.post,'uResolution'),this.canvas.width,this.canvas.height);gl.uniform1i(gl.getUniformLocation(this.post,'uEDL'),edl?1:0);gl.drawArrays(gl.TRIANGLES,0,3);
+    gl.uniform1i(gl.getUniformLocation(this.post,'uColor'),0);gl.uniform1i(gl.getUniformLocation(this.post,'uDepth'),1);gl.uniform2f(gl.getUniformLocation(this.post,'uResolution'),this.canvas.width,this.canvas.height);gl.uniform1i(gl.getUniformLocation(this.post,'uEDL'),edl?1:0);
+    gl.uniform1f(gl.getUniformLocation(this.post,'uEDLStrength'),colorMode===0?edlStrength:14);gl.drawArrays(gl.TRIANGLES,0,3);
     if(query){gl.endQuery(this.timerExt.TIME_ELAPSED_EXT);this.pendingQueries.push(query);}
     if(present){
       const backdrop=this.backgrounds.get(background);

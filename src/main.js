@@ -7,6 +7,7 @@ import {evaluateImagePair,temporalResidualMetric} from './core/metrics.js';
 import {SurfelRenderer} from './render/renderer.js';
 import {DEFAULT_SUN,sunlightSettings} from './render/lighting.js';
 import {BACKGROUNDS} from './render/backgrounds.js';
+import {materialSettings,ORIGINAL_MATERIAL} from './render/materials.js';
 import {fetchCatalog} from './core/catalog.js';
 
 const $=id=>document.getElementById(id);
@@ -17,7 +18,17 @@ let renderer;
 try {renderer=new SurfelRenderer($('viewport'));} catch(error){status(error.message,true);throw error;}
 
 function options(){return {budget:Number($('budget').value),mode:$('method').value,dt:1/30,stable:$('stable').checked,temporal:$('stable').checked,emaSeconds:$('stable').checked?.12:0,hysteresis:$('stable').checked?Number($('margin').value)/100:0,swapQuota:$('stable').checked?Number($('quota').value)/100:1};}
-function renderingOptions(){return {radiusScale:Number($('radius').value)/10,pointMode:$('primitive').value==='points',colorMode:Number($('colors').value),edl:$('edl').checked,sunlight:sunlightSettings({azimuth:Number($('sun-azimuth').value),elevation:Number($('sun-elevation').value),intensity:Number($('sun-intensity').value)/100}),background:state.background,captureBackground:'legacy-solid'};}
+function selectedMaterial(){
+  if(Number($('colors').value)!==0)return ORIGINAL_MATERIAL;
+  const choice=$('material').value;
+  return materialSettings(choice==='auto'?(state.cloud?.metadata.hasColors===false?'azure':'original'):choice);
+}
+function updateMaterialNote(){
+  const material=selectedMaterial();
+  $('material-note').textContent=Number($('colors').value)!==0?'Diagnostic colors use original shading.':`${material.label} · ${material.id==='original'?'source colors / fallback':'presentation material'} · Comparisons use Original + standard depth shading.`;
+}
+$('material').addEventListener('change',updateMaterialNote);$('colors').addEventListener('change',updateMaterialNote);
+function renderingOptions(){const material=selectedMaterial();return {radiusScale:Number($('radius').value)/10,pointMode:$('primitive').value==='points',colorMode:Number($('colors').value),edl:$('edl').checked,material,edlStrength:material.edlStrength,sunlight:sunlightSettings({azimuth:Number($('sun-azimuth').value),elevation:Number($('sun-elevation').value),intensity:Number($('sun-intensity').value)/100}),background:state.background,captureBackground:'legacy-solid'};}
 let backgroundRequest=0;
 async function changeBackground(id){
   if(state.busy){$('background').value=state.background;return;}
@@ -61,7 +72,7 @@ function setCloud(cloud){
   $('dataset-source').replaceChildren();
   if(cloud.metadata.sourceURL){const a=document.createElement('a');a.href=cloud.metadata.sourceURL;a.target='_blank';a.rel='noopener';a.textContent='Model source';$('dataset-source').append(a,document.createTextNode(` · ${cloud.metadata.license||'See source for license'} · ${cloud.metadata.sourceKind==='mesh-derived'?'sampled from a mesh surface':'point cloud input'}`));}
   if(cloud.metadata.preprocessorRecommended)$('primitive').value='points';else $('primitive').value='surfels';
-  state.results=null;$('export-results').disabled=true;$('result-table').replaceChildren();updateLabels();
+  state.results=null;$('export-results').disabled=true;$('result-table').replaceChildren();updateLabels();updateMaterialNote();
   status(cloud.metadata.preprocessorRecommended?'Raw point cloud loaded. Missing normals and geometry use preview fallbacks; preprocess offline before formal experiments.':'Scene loaded. Lower the point budget and play a camera path to inspect the changes.');
 }
 function updateLabels(){const b=Number($('budget').value);$('budget-fraction').textContent=`${(100*b/Math.max(1,state.cloud?.count||1)).toFixed(1)}% of input · submitted instances ≤ B`;$('quota-value').value=`${$('quota').value}%`;$('margin-value').value=`${$('margin').value}%`;$('radius-value').value=`${(Number($('radius').value)/10).toFixed(1)}×`;}
@@ -133,9 +144,9 @@ const percentile=(values,q)=>{const a=values.filter(Number.isFinite).sort((a,b)=
 async function runExperiment({samples=61,duration=2,modes=['uniform','screen','geometry','full'],width=320,height=240}={}){
   if(state.busy)throw new Error('Experiment already running');if(state.loadingDataset)throw new Error('Wait for the point cloud to finish loading.');if(state.backgroundLoading)throw new Error('Wait for the background to finish loading.');
   if(!Number.isInteger(samples)||samples<2||samples>500||!Number.isFinite(duration)||duration<=0)throw new Error('Use 2–500 samples and a positive duration.');
-  const locked=Array.from(document.querySelectorAll('aside input, aside select, aside button, #background, .sunlight-controls input, .sunlight-controls button, .experiment-controls select, .experiment-controls button')).map(element=>({element,disabled:element.disabled}));
+  const locked=Array.from(document.querySelectorAll('aside input, aside select, aside button, #background, #material, .sunlight-controls input, .sunlight-controls button, .experiment-controls select, .experiment-controls button')).map(element=>({element,disabled:element.disabled}));
   for(const {element} of locked)element.disabled=true;state.busy=true;state.playing=false;
-  const oldSize=[renderer.canvas.width,renderer.canvas.height],settings=renderingOptions(),budget=Number($('budget').value),path=$('path').value,records=[],selectionSettings={emaSeconds:.12,hysteresis:Number($('margin').value)/100,swapQuota:Number($('quota').value)/100};
+  const oldSize=[renderer.canvas.width,renderer.canvas.height],presentationSettings=renderingOptions(),settings={...presentationSettings,material:ORIGINAL_MATERIAL,edlStrength:14},budget=Number($('budget').value),path=$('path').value,records=[],selectionSettings={emaSeconds:.12,hysteresis:Number($('margin').value)/100,swapQuota:Number($('quota').value)/100};
   try{
     renderer.resize(width,height);renderer.timerEnabled=false;
     const variants=[];
@@ -163,7 +174,7 @@ async function runExperiment({samples=61,duration=2,modes=['uniform','screen','g
     for(const v of variants){const a=v.samplesOut,valid=a.filter(x=>Number.isFinite(x.temporalResidualRgb)&&x.validPixelCount>0),n=valid.reduce((s,x)=>s+x.validPixelCount,0);
       records.push({mode:v.mode,stable:v.stable,summary:{maeRgb:mean(a.map(x=>x.maeRgb)),foregroundHoleRate:mean(a.map(x=>x.foregroundHoleRate)),silhouetteMismatchRate:mean(a.map(x=>x.silhouetteMismatchRate)),temporalResidualRgb:n?valid.reduce((s,x)=>s+x.temporalResidualRgb*x.validPixelCount,0)/n:null,selectionMedianMs:percentile(a.map(x=>x.selectionMs),.5),selectionP95Ms:percentile(a.map(x=>x.selectionMs),.95),candidateMedianMs:percentile(a.map(x=>x.candidateMs),.5),minCount:Math.min(...a.map(x=>x.count)),maxCount:Math.max(...a.map(x=>x.count))},samples:a});
     }
-    state.results={version:1,kind:'browser-diagnostic',date:new Date().toISOString(),input:state.cloud.name,count:state.cloud.count,cloudMetadata:state.cloud.metadata,featureSources:state.cloud.metadata.featureSources,viewport:{width,height},budget,path,duration,captureHz:(samples-1)/duration,selectionHz:30,selectionSettings,rendering:settings,environment:{userAgent:navigator.userAgent,renderer:renderer.gl.getParameter(renderer.gl.RENDERER)},notes:['Synthetic inputs do not establish generalization to real scans.','Readback synchronizes GPU. Selection timings are CPU wall time, not FPS or GPU performance.','Full-point image is a same-shader reference, not geometric ground truth.','All variants advance at fixed 30Hz using the same candidate pool, including union-retained IDs.','Temporal residual is weighted by valid reference correspondences; cuts are excluded.','Octree traversal is a prototype: streaming, per-level footprints and large-scale optimization remain pending.'],records};
+    state.results={version:1,kind:'browser-diagnostic',date:new Date().toISOString(),input:state.cloud.name,count:state.cloud.count,cloudMetadata:state.cloud.metadata,featureSources:state.cloud.metadata.featureSources,viewport:{width,height},budget,path,duration,captureHz:(samples-1)/duration,selectionHz:30,selectionSettings,rendering:settings,presentationRendering:presentationSettings,environment:{userAgent:navigator.userAgent,renderer:renderer.gl.getParameter(renderer.gl.RENDERER)},notes:['Synthetic inputs do not establish generalization to real scans.','Readback synchronizes GPU. Selection timings are CPU wall time, not FPS or GPU performance.','Full-point image is a same-shader reference, not geometric ground truth.','Comparisons force Original material and EDL strength 14; presentationRendering records the requested viewer styling.','All variants advance at fixed 30Hz using the same candidate pool, including union-retained IDs.','Temporal residual is weighted by valid reference correspondences; cuts are excluded.','Octree traversal is a prototype: streaming, per-level footprints and large-scale optimization remain pending.'],records};
     $('export-results').disabled=false;renderResults(state.results);status('Comparison complete. Export per-frame JSON; results apply only to the current input and settings.');return state.results;
   }finally{renderer.timerEnabled=true;renderer.resize(...oldSize);state.busy=false;for(const {element,disabled} of locked)element.disabled=disabled;$('export-results').disabled=!state.results;resetSelection();}
 }
@@ -175,4 +186,4 @@ $('experiment').addEventListener('click',()=>runExperiment().catch(error=>status
 setCloud(createDemoCloud());resize();requestAnimationFrame(tick);
 fetchCatalog().then(entries=>{catalog=entries;for(const entry of entries){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.label;$('dataset').append(option);}const requested=new URLSearchParams(location.search).get('dataset');if(requested&&(entries.some(e=>e.id===requested)||requested==='fixture'||requested==='synthetic'))loadDataset(requested);}).catch(error=>status(error.message,true));
 // Read-only diagnostics + explicit experiment hook for reproducible automation.
-window.COMP5411={get state(){return {count:state.cloud.count,budget:Number($('budget').value),drawn:renderer.count,selection:state.selection,cloudMetadata:state.cloud.metadata,busy:state.busy,loadingDataset:!!state.loadingDataset,dataset:$('dataset').value,gpuMs:renderer.lastGpuMs,background:state.background,backgroundLoading:state.backgroundLoading};},runExperiment,renderer};
+window.COMP5411={get state(){return {count:state.cloud.count,budget:Number($('budget').value),drawn:renderer.count,selection:state.selection,cloudMetadata:state.cloud.metadata,busy:state.busy,loadingDataset:!!state.loadingDataset,dataset:$('dataset').value,gpuMs:renderer.lastGpuMs,background:state.background,backgroundLoading:state.backgroundLoading,material:selectedMaterial().id,materialChoice:$('material').value};},runExperiment,renderer};
