@@ -4,7 +4,7 @@
   "datasets": [
     {
       "id": "jetliner",
-      "label": "宽体客机 / Jumbo Jet",
+      "label": "Jumbo Jet",
       "sourceURL": "https://opengameart.org/content/jumbo-jetwide-body",
       "license": "CC0-1.0",
       "licenseURL": "https://opengameart.org/content/jumbo-jetwide-body",
@@ -19,7 +19,7 @@
     },
     {
       "id": "funky-aircraft",
-      "label": "风格化飞机 / Funky aircraft",
+      "label": "Funky aircraft",
       "sourceURL": "https://opengameart.org/content/funky-aircraft",
       "license": "CC0-1.0",
       "licenseURL": "https://opengameart.org/content/funky-aircraft",
@@ -34,7 +34,7 @@
     },
     {
       "id": "stanford-bunny",
-      "label": "Stanford Bunny / 兔子",
+      "label": "Stanford Bunny",
       "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
       "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
       "licenseURL": "https://graphics.stanford.edu/data/3Dscanrep/",
@@ -49,7 +49,7 @@
     },
     {
       "id": "stanford-dragon",
-      "label": "Stanford Dragon / 龙",
+      "label": "Stanford Dragon",
       "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
       "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
       "licenseURL": "https://graphics.stanford.edu/data/3Dscanrep/",
@@ -64,7 +64,7 @@
     },
     {
       "id": "teapot",
-      "label": "Utah Teapot / 茶壶",
+      "label": "Utah Teapot",
       "sourceURL": "https://casual-effects.com/g3d/data10/",
       "license": "CC0-1.0",
       "licenseURL": "https://casual-effects.com/g3d/data10/common/model/teapot/info.js",
