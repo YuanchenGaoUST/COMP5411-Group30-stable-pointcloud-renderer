@@ -14,6 +14,8 @@ A computer graphics research prototype for rendering static point clouds with a 
 
 *An actual render from this application, using the bundled aircraft point cloud. It is a full-point reference rendered with opaque surfels, not an AI-generated result.*
 
+The documentation screenshots show the current English interface. [Screenshot settings](docs/images/capture-manifest.json) record the 22 November 2026 capture; historical experiment values remain in their original result files.
+
 ## Quick start
 
 The viewer needs **Python 3.10+** and a browser with **WebGL2** enabled. No frontend build, npm installation, CDN, or Python numerical dependency is needed to view the bundled inputs.

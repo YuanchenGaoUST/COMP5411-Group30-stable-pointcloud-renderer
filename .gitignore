@@ -28,3 +28,11 @@ docs/final-presentation/demo-recording-2026-11-21/配音与剪辑说明.txt
 docs/final-presentation/COMP5411_A4_Demo_Script_and_Guide.docx
 docs/final-presentation/a4_demo_narration_en.txt
 docs/final-presentation/a4_recording_guide_zh.txt
+
+# Retired Chinese UI captures; current English previews live in docs/images/.
+results/validation/viewer.png
+results/validation/viewer-experiment.png
+results/validation/catalog/airplane-fullpoint.png
+results/validation/catalog/airplane-viewer.png
+results/validation/post-catalog-regression/viewer.png
+results/validation/post-catalog-regression/viewer-experiment.png

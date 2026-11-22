@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-22",
+  "purpose": "Current English documentation screenshots; not replacements for historical measurements",
+  "backend": "Chrome headless / SwiftShader; functionality preview, not a native-GPU benchmark",
+  "visibleTextLanguage": "English; no Han characters in visible body text",
+  "pageErrors": [],
+  "captures": [
+    {
+      "file": "viewer-interface.png",
+      "canvasOnly": false,
+      "input": "jetliner",
+      "count": 15000,
+      "drawn": 7500,
+      "budget": 7500,
+      "view": "surface",
+      "material": "auto"
+    },
+    {
+      "file": "viewer-materials.png",
+      "canvasOnly": false,
+      "input": "jetliner",
+      "count": 15000,
+      "drawn": 7500,
+      "budget": 7500,
+      "view": "surface",
+      "material": "auto"
+    },
+    {
+      "file": "airplane-surfel.png",
+      "canvasOnly": true,
+      "input": "jetliner",
+      "count": 15000,
+      "drawn": 15000,
+      "budget": 7500,
+      "view": "surface",
+      "material": "auto"
+    },
+    {
+      "file": "viewer-point-cloud.png",
+      "canvasOnly": false,
+      "input": "jetliner",
+      "count": 15000,
+      "drawn": 15000,
+      "budget": 7500,
+      "view": "points",
+      "material": "auto"
+    },
+    {
+      "file": "viewer-sunlight-backgrounds.png",
+      "canvasOnly": false,
+      "input": "jetliner",
+      "count": 15000,
+      "drawn": 7500,
+      "budget": 7500,
+      "view": "surface",
+      "material": "auto"
+    }
+  ]
+}
