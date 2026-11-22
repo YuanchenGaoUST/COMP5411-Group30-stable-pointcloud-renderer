@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "initial": {
+    "count": 14400,
+    "budget": 2880,
+    "drawn": 2880,
+    "foregroundPixels": 41561
+  },
+  "tested": [
+    "WebGL2 shaders/framebuffers",
+    "foreground rendered",
+    "hard count cap across modes",
+    "stable on/off",
+    "zero replacement quota",
+    "surfel/point sprite",
+    "EDL on/off",
+    "offline PCA fixture",
+    "camera playback",
+    "common-candidate seven-way experiment",
+    "RGB/temporal readback",
+    "camera-cut restart and reference-mask exclusion"
+  ],
+  "consoleErrors": [],
+  "renderer": "headless Chrome / SwiftShader; diagnostic timings are not native GPU performance"
+}

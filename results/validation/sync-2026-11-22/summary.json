@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "date": "2026-11-22",
+  "remoteBase": "7eafd3398e7b94b21d75d3b2ec3c523d6a8916cb",
+  "unitTests": {
+    "javascript": 35,
+    "python": 26
+  },
+  "browserReports": {
+    "background": "background-smoke.json",
+    "browser": "browser-smoke.json",
+    "catalog": "catalog-smoke.json",
+    "material": "material-smoke.json",
+    "point-view": "point-view-smoke.json",
+    "sunlight": "sunlight-smoke.json",
+    "viewer-ui": "viewer-ui-smoke.json"
+  },
+  "backend": "Chrome headless / ANGLE SwiftShader; functional checks, not native-GPU benchmarks",
+  "rerunNote": "The general browser suite initially timed out at startup in the batch run. The unchanged script passed independently; the initial timeout was not reproduced. The batch runner also corrected its viewer-ui script filename before that suite passed. No application assertions were relaxed.",
+  "sourceSha256": {
+    "index.html": "fad765ce97bc9a97f04a859a933d8a15d306a914013f5d42e43bfe6dcfc84306",
+    "src/main.js": "4975f7d1b55ec6088ac142fb9e9b527b7855c646715f0e022f14b38215472596",
+    "src/styles.css": "9aed7a54a75e2854660a819e21c17559392f7345f0ab3c20b11b45dfe24f1b38",
+    "src/render/renderer.js": "fc4f1a5fbb41c709853be4874a1d83a82f3790caa3b9710b465d72a4e559c033",
+    "src/render/shaders.js": "1fe2e7e15ffce81a4ba5c566507c98f5a795024e968c56990d26f03655e3dd66"
+  }
+}

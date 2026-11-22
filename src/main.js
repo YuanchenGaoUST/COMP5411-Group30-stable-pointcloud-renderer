@@ -6,14 +6,34 @@ import {cameraAt} from './core/camera-paths.js';
 import {evaluateImagePair,temporalResidualMetric} from './core/metrics.js';
 import {SurfelRenderer} from './render/renderer.js';
 import {DEFAULT_SUN,sunlightSettings} from './render/lighting.js';
-import {BACKGROUNDS} from './render/backgrounds.js';
 import {materialSettings,ORIGINAL_MATERIAL} from './render/materials.js';
 import {fetchCatalog} from './core/catalog.js';
 
 const $=id=>document.getElementById(id);
 const status=(message,error=false)=>{$('status').textContent=message;$('status').classList.toggle('error',error);};
 const labels={uniform:'Uniform',screen:'Screen',geometry:'Geometry',full:'Geometry + contrast'};
-const state={cloud:null,tree:null,selector:null,selection:null,busy:false,playing:false,pathTime:0,previousPathTime:0,manual:{yaw:.38,pitch:.21,distance:6},lastSelectionMs:0,lastSelectionAt:-Infinity,lastFrameAt:0,fps:0,frameCount:0,lastFpsAt:performance.now(),results:null,background:'solid',backgroundLoading:false};
+const state={cloud:null,tree:null,selector:null,selection:null,busy:false,playing:false,pathTime:0,previousPathTime:0,manual:{yaw:.38,pitch:.21,distance:6},lastSelectionMs:0,lastSelectionAt:-Infinity,lastFrameAt:0,fps:0,frameCount:0,lastFpsAt:performance.now(),results:null,background:'solid',backgroundLoading:false,view:new URLSearchParams(location.search).get('view')==='points'?'points':'surface'};
+function setPlaying(playing){
+  state.playing=playing;
+  $('play').textContent=playing?'Pause path':'Play path';
+  $('play').setAttribute('aria-pressed',String(playing));
+}
+function updateViewControls(){
+  const points=state.view==='points';
+  $('view-points').setAttribute('aria-pressed',String(points));
+  $('view-surface').setAttribute('aria-pressed',String(!points));
+  $('view-points').disabled=state.busy;$('view-surface').disabled=state.busy;
+  $('point-size-control').hidden=!points;$('point-size').disabled=state.busy||!points;
+  $('point-size-value').value=`${Number($('point-size').value)} px`;
+  $('surface-controls').hidden=points;
+  for(const id of ['primitive','radius','edl','sun-azimuth','sun-elevation','sun-intensity','sun-reset'])$(id).disabled=state.busy||points;
+  document.querySelector('.sunlight-panel').dataset.inactive=String(points);
+  document.querySelector('.sunlight-heading .muted').textContent=points?'Not applied in point-cloud view':'Directional light · No cast shadows';
+}
+function setView(view){if(state.busy)return;state.view=view;updateViewControls();}
+$('view-points').addEventListener('click',()=>setView('points'));
+$('view-surface').addEventListener('click',()=>setView('surface'));
+$('point-size').addEventListener('input',updateViewControls);
 let renderer;
 try {renderer=new SurfelRenderer($('viewport'));} catch(error){status(error.message,true);throw error;}
 
@@ -23,25 +43,18 @@ function selectedMaterial(){
   const choice=$('material').value;
   return materialSettings(choice==='auto'?(state.cloud?.metadata.hasColors===false?'azure':'original'):choice);
 }
-function updateMaterialNote(){
-  const material=selectedMaterial();
-  $('material-note').textContent=Number($('colors').value)!==0?'Diagnostic colors use original shading.':`${material.label} · ${material.id==='original'?'source colors / fallback':'presentation material'} · Comparisons use Original + standard depth shading.`;
-}
-$('material').addEventListener('change',updateMaterialNote);$('colors').addEventListener('change',updateMaterialNote);
-function renderingOptions(){const material=selectedMaterial();return {radiusScale:Number($('radius').value)/10,pointMode:$('primitive').value==='points',colorMode:Number($('colors').value),edl:$('edl').checked,material,edlStrength:material.edlStrength,sunlight:sunlightSettings({azimuth:Number($('sun-azimuth').value),elevation:Number($('sun-elevation').value),intensity:Number($('sun-intensity').value)/100}),background:state.background,captureBackground:'legacy-solid'};}
+function renderingOptions(){const material=selectedMaterial();return {view:state.view,rawPoints:state.view==='points',pointSize:Number($('point-size').value)*Math.min(devicePixelRatio||1,1.5),pointSizeCss:Number($('point-size').value),radiusScale:Number($('radius').value)/10,pointMode:$('primitive').value==='points',colorMode:Number($('colors').value),edl:$('edl').checked,material,edlStrength:material.edlStrength,sunlight:sunlightSettings({azimuth:Number($('sun-azimuth').value),elevation:Number($('sun-elevation').value),intensity:Number($('sun-intensity').value)/100}),background:state.background,captureBackground:'legacy-solid'};}
 let backgroundRequest=0;
 async function changeBackground(id){
   if(state.busy){$('background').value=state.background;return;}
-  const request=++backgroundRequest;state.backgroundLoading=true;$('background-note').textContent='Loading backdrop…';
+  const request=++backgroundRequest;state.backgroundLoading=true;$('background').setAttribute('aria-busy','true');
   try{
     await renderer.loadBackground(id);if(request!==backgroundRequest)return;
     state.background=id;$('background').value=id;
-    const entry=BACKGROUNDS.find(item=>item.id===id);
-    $('background-note').textContent=id==='solid'?'Original solid background · also used for image measurements':`${entry.label} · AI-generated image · display only`;
   }catch(error){
     if(request!==backgroundRequest)return;
-    $('background').value=state.background;$('background-note').textContent=`Backdrop unavailable; keeping the current background. ${error.message}`;
-  }finally{if(request===backgroundRequest)state.backgroundLoading=false;}
+    $('background').value=state.background;status(`Backdrop unavailable; keeping the current background. ${error.message}`,true);
+  }finally{if(request===backgroundRequest){state.backgroundLoading=false;$('background').setAttribute('aria-busy','false');}}
 }
 $('background').addEventListener('change',()=>changeBackground($('background').value));
 changeBackground($('background').value);
@@ -62,7 +75,7 @@ new ResizeObserver(resize).observe($('viewport'));
 function manualCameraDefaults(cloud){return {distance:Math.max(cloud.bounds.radius*(cloud.metadata.sourceKind==='mesh-derived'?2:2.65),.6),yaw:cloud.metadata.preview?.yaw??.38,pitch:cloud.metadata.preview?.pitch??.21};}
 function setCloud(cloud){
   if(!cloud.count)throw new Error('The point cloud is empty. Choose a valid input.');
-  state.cloud=cloud;state.tree=buildOctree(cloud);state.selector=new StableSelector(cloud);state.selection=null;state.lastSelectionAt=-Infinity;state.playing=false;state.pathTime=0;
+  state.cloud=cloud;state.tree=buildOctree(cloud);state.selector=new StableSelector(cloud);state.selection=null;state.lastSelectionAt=-Infinity;setPlaying(false);state.pathTime=0;
   state.manual=manualCameraDefaults(cloud);
   $('scene-name').textContent=cloud.name;$('budget').max=cloud.count;$('budget-value').max=cloud.count;
   $('budget').value=Math.max(1,Math.round(cloud.count*(cloud.metadata.preview?.budgetRatio??.2)));$('budget-value').value=$('budget').value;
@@ -72,7 +85,7 @@ function setCloud(cloud){
   $('dataset-source').replaceChildren();
   if(cloud.metadata.sourceURL){const a=document.createElement('a');a.href=cloud.metadata.sourceURL;a.target='_blank';a.rel='noopener';a.textContent='Model source';$('dataset-source').append(a,document.createTextNode(` · ${cloud.metadata.license||'See source for license'} · ${cloud.metadata.sourceKind==='mesh-derived'?'sampled from a mesh surface':'point cloud input'}`));}
   if(cloud.metadata.preprocessorRecommended)$('primitive').value='points';else $('primitive').value='surfels';
-  state.results=null;$('export-results').disabled=true;$('result-table').replaceChildren();updateLabels();updateMaterialNote();
+  state.results=null;$('export-results').disabled=true;$('result-table').replaceChildren();updateLabels();updateViewControls();
   status(cloud.metadata.preprocessorRecommended?'Raw point cloud loaded. Missing normals and geometry use preview fallbacks; preprocess offline before formal experiments.':'Scene loaded. Lower the point budget and play a camera path to inspect the changes.');
 }
 function updateLabels(){const b=Number($('budget').value);$('budget-fraction').textContent=`${(100*b/Math.max(1,state.cloud?.count||1)).toFixed(1)}% of input · submitted instances ≤ B`;$('quota-value').value=`${$('quota').value}%`;$('margin-value').value=`${$('margin').value}%`;$('radius-value').value=`${(Number($('radius').value)/10).toFixed(1)}×`;}
@@ -106,14 +119,14 @@ $('file').addEventListener('change',async event=>{
     datasetRequest++;setCloud(createCloud({...cloud,positions,radii,metadata:{...cloud.metadata,importNormalizationScale:scale}}));$('dataset').value='';state.loadingDataset=false;$('experiment').disabled=false;
   }catch(error){status(`Loading failed: ${error.message}`,true);}event.target.value='';
 });
-$('play').addEventListener('click',()=>{if(state.busy)return;state.playing=!state.playing;state.previousPathTime=state.pathTime;resetSelection();});
+$('play').addEventListener('click',()=>{if(state.busy)return;setPlaying(!state.playing);state.previousPathTime=state.pathTime;resetSelection();});
 $('path').addEventListener('change',()=>{state.pathTime=0;state.previousPathTime=0;resetSelection();});
-$('reset').addEventListener('click',()=>{if(state.busy)return;state.pathTime=0;state.previousPathTime=0;state.manual=manualCameraDefaults(state.cloud);resetSelection();});
+$('reset').addEventListener('click',()=>{if(state.busy)return;setPlaying(false);state.pathTime=0;state.previousPathTime=0;state.manual=manualCameraDefaults(state.cloud);resetSelection();});
 let dragging=null;
-$('viewport').addEventListener('pointerdown',event=>{if(state.busy)return;state.playing=false;dragging=[event.clientX,event.clientY];$('viewport').setPointerCapture(event.pointerId);});
+$('viewport').addEventListener('pointerdown',event=>{if(state.busy)return;setPlaying(false);dragging=[event.clientX,event.clientY];$('viewport').setPointerCapture(event.pointerId);});
 $('viewport').addEventListener('pointermove',event=>{if(!dragging)return;state.manual.yaw+=(event.clientX-dragging[0])*.006;state.manual.pitch=Math.max(-1.4,Math.min(1.4,state.manual.pitch+(event.clientY-dragging[1])*.006));dragging=[event.clientX,event.clientY];});
 $('viewport').addEventListener('pointerup',()=>dragging=null);
-$('viewport').addEventListener('wheel',event=>{event.preventDefault();if(state.busy)return;state.playing=false;state.manual.distance=Math.max(.18,Math.min(18,state.manual.distance*Math.exp(event.deltaY*.001)));},{passive:false});
+$('viewport').addEventListener('wheel',event=>{event.preventDefault();if(state.busy)return;setPlaying(false);state.manual.distance=Math.max(.18,Math.min(18,state.manual.distance*Math.exp(event.deltaY*.001)));},{passive:false});
 $('viewport').addEventListener('dblclick',()=>$('reset').click());
 
 function tick(now){
@@ -144,9 +157,9 @@ const percentile=(values,q)=>{const a=values.filter(Number.isFinite).sort((a,b)=
 async function runExperiment({samples=61,duration=2,modes=['uniform','screen','geometry','full'],width=320,height=240}={}){
   if(state.busy)throw new Error('Experiment already running');if(state.loadingDataset)throw new Error('Wait for the point cloud to finish loading.');if(state.backgroundLoading)throw new Error('Wait for the background to finish loading.');
   if(!Number.isInteger(samples)||samples<2||samples>500||!Number.isFinite(duration)||duration<=0)throw new Error('Use 2–500 samples and a positive duration.');
-  const locked=Array.from(document.querySelectorAll('aside input, aside select, aside button, #background, #material, .sunlight-controls input, .sunlight-controls button, .experiment-controls select, .experiment-controls button')).map(element=>({element,disabled:element.disabled}));
-  for(const {element} of locked)element.disabled=true;state.busy=true;state.playing=false;
-  const oldSize=[renderer.canvas.width,renderer.canvas.height],presentationSettings=renderingOptions(),settings={...presentationSettings,material:ORIGINAL_MATERIAL,edlStrength:14},budget=Number($('budget').value),path=$('path').value,records=[],selectionSettings={emaSeconds:.12,hysteresis:Number($('margin').value)/100,swapQuota:Number($('quota').value)/100};
+  const locked=Array.from(document.querySelectorAll('aside input, aside select, aside button, #background, #material, #view-points, #view-surface, #point-size, .sunlight-controls input, .sunlight-controls button, .experiment-controls select, .experiment-controls button')).map(element=>({element,disabled:element.disabled}));
+  for(const {element} of locked)element.disabled=true;state.busy=true;setPlaying(false);
+  const oldSize=[renderer.canvas.width,renderer.canvas.height],presentationSettings=renderingOptions(),settings={...presentationSettings,view:'surface',rawPoints:false,material:ORIGINAL_MATERIAL,edlStrength:14},budget=Number($('budget').value),path=$('path').value,records=[],selectionSettings={emaSeconds:.12,hysteresis:Number($('margin').value)/100,swapQuota:Number($('quota').value)/100};
   try{
     renderer.resize(width,height);renderer.timerEnabled=false;
     const variants=[];
@@ -175,8 +188,9 @@ async function runExperiment({samples=61,duration=2,modes=['uniform','screen','g
       records.push({mode:v.mode,stable:v.stable,summary:{maeRgb:mean(a.map(x=>x.maeRgb)),foregroundHoleRate:mean(a.map(x=>x.foregroundHoleRate)),silhouetteMismatchRate:mean(a.map(x=>x.silhouetteMismatchRate)),temporalResidualRgb:n?valid.reduce((s,x)=>s+x.temporalResidualRgb*x.validPixelCount,0)/n:null,selectionMedianMs:percentile(a.map(x=>x.selectionMs),.5),selectionP95Ms:percentile(a.map(x=>x.selectionMs),.95),candidateMedianMs:percentile(a.map(x=>x.candidateMs),.5),minCount:Math.min(...a.map(x=>x.count)),maxCount:Math.max(...a.map(x=>x.count))},samples:a});
     }
     state.results={version:1,kind:'browser-diagnostic',date:new Date().toISOString(),input:state.cloud.name,count:state.cloud.count,cloudMetadata:state.cloud.metadata,featureSources:state.cloud.metadata.featureSources,viewport:{width,height},budget,path,duration,captureHz:(samples-1)/duration,selectionHz:30,selectionSettings,rendering:settings,presentationRendering:presentationSettings,environment:{userAgent:navigator.userAgent,renderer:renderer.gl.getParameter(renderer.gl.RENDERER)},notes:['Synthetic inputs do not establish generalization to real scans.','Readback synchronizes GPU. Selection timings are CPU wall time, not FPS or GPU performance.','Full-point image is a same-shader reference, not geometric ground truth.','Comparisons force Original material and EDL strength 14; presentationRendering records the requested viewer styling.','All variants advance at fixed 30Hz using the same candidate pool, including union-retained IDs.','Temporal residual is weighted by valid reference correspondences; cuts are excluded.','Octree traversal is a prototype: streaming, per-level footprints and large-scale optimization remain pending.'],records};
-    $('export-results').disabled=false;renderResults(state.results);status('Comparison complete. Export per-frame JSON; results apply only to the current input and settings.');return state.results;
-  }finally{renderer.timerEnabled=true;renderer.resize(...oldSize);state.busy=false;for(const {element,disabled} of locked)element.disabled=disabled;$('export-results').disabled=!state.results;resetSelection();}
+    state.results.notes.push('Point-cloud view is for inspection. Comparisons use the surface renderer; presentationRendering records the requested view and dot size.');
+    $('export-results').disabled=false;renderResults(state.results);status(state.view==='points'?'Surface comparison complete. Point-cloud view restored; export JSON for rendering settings and results.':'Comparison complete. Export per-frame JSON; results apply only to the current input and settings.');return state.results;
+  }finally{renderer.timerEnabled=true;renderer.resize(...oldSize);state.busy=false;for(const {element,disabled} of locked)element.disabled=disabled;$('export-results').disabled=!state.results;updateViewControls();resetSelection();}
 }
 function renderResults(results){
   const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');for(const s of ['Method','Stable','RGB MAE','Holes','Temporal','CPU p50']){const th=document.createElement('th');th.textContent=s;tr.append(th);}head.append(tr);table.append(head);const body=document.createElement('tbody');
@@ -186,4 +200,4 @@ $('experiment').addEventListener('click',()=>runExperiment().catch(error=>status
 setCloud(createDemoCloud());resize();requestAnimationFrame(tick);
 fetchCatalog().then(entries=>{catalog=entries;for(const entry of entries){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.label;$('dataset').append(option);}const requested=new URLSearchParams(location.search).get('dataset');if(requested&&(entries.some(e=>e.id===requested)||requested==='fixture'||requested==='synthetic'))loadDataset(requested);}).catch(error=>status(error.message,true));
 // Read-only diagnostics + explicit experiment hook for reproducible automation.
-window.COMP5411={get state(){return {count:state.cloud.count,budget:Number($('budget').value),drawn:renderer.count,selection:state.selection,cloudMetadata:state.cloud.metadata,busy:state.busy,loadingDataset:!!state.loadingDataset,dataset:$('dataset').value,gpuMs:renderer.lastGpuMs,background:state.background,backgroundLoading:state.backgroundLoading,material:selectedMaterial().id,materialChoice:$('material').value};},runExperiment,renderer};
+window.COMP5411={get state(){return {count:state.cloud.count,budget:Number($('budget').value),drawn:renderer.count,selection:state.selection,cloudMetadata:state.cloud.metadata,busy:state.busy,loadingDataset:!!state.loadingDataset,dataset:$('dataset').value,gpuMs:renderer.lastGpuMs,background:state.background,backgroundLoading:state.backgroundLoading,material:selectedMaterial().id,materialChoice:$('material').value,view:state.view,pointSize:Number($('point-size').value)};},runExperiment,renderer};

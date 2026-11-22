@@ -1,0 +1,160 @@
+{
+  "status": "passed",
+  "placement": {
+    "aboveCanvas": true
+  },
+  "materials": [
+    {
+      "id": "original",
+      "effectiveMaterial": "original",
+      "choice": "original",
+      "drawn": 7500,
+      "budget": 7500,
+      "foregroundPixels": 51123,
+      "changedForegroundPixels": 0,
+      "changedBackgroundPixels": 0,
+      "depthChanges": 0,
+      "foregroundMeanRGB": [
+        169.82313244527904,
+        167.9835103573734,
+        162.44297087416624
+      ],
+      "meanForegroundDifference": 0,
+      "sameIds": true,
+      "sameUploadedAttributes": true,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "azure",
+      "effectiveMaterial": "azure",
+      "choice": "azure",
+      "drawn": 7500,
+      "budget": 7500,
+      "foregroundPixels": 51123,
+      "changedForegroundPixels": 51123,
+      "changedBackgroundPixels": 0,
+      "depthChanges": 0,
+      "foregroundMeanRGB": [
+        35.142264734072725,
+        96.78868610997007,
+        148.539052872484
+      ],
+      "meanForegroundDifference": 76.96968096551454,
+      "sameIds": true,
+      "sameUploadedAttributes": true,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "copper",
+      "effectiveMaterial": "copper",
+      "choice": "copper",
+      "drawn": 7500,
+      "budget": 7500,
+      "foregroundPixels": 51123,
+      "changedForegroundPixels": 51123,
+      "changedBackgroundPixels": 0,
+      "depthChanges": 0,
+      "foregroundMeanRGB": [
+        131.50167243706355,
+        73.90573714375134,
+        40.033976879291124
+      ],
+      "meanForegroundDifference": 87.04605885152802,
+      "sameIds": true,
+      "sameUploadedAttributes": true,
+      "pngMaxDelta": 0
+    },
+    {
+      "id": "jade",
+      "effectiveMaterial": "jade",
+      "choice": "jade",
+      "drawn": 7500,
+      "budget": 7500,
+      "foregroundPixels": 51123,
+      "changedForegroundPixels": 51123,
+      "changedBackgroundPixels": 0,
+      "depthChanges": 0,
+      "foregroundMeanRGB": [
+        38.94315670050662,
+        115.09305009486924,
+        86.97036558887389
+      ],
+      "meanForegroundDifference": 88.9566340003521,
+      "sameIds": true,
+      "sameUploadedAttributes": true,
+      "pngMaxDelta": 0
+    }
+  ],
+  "highlight": {
+    "changedForegroundPixels": 14552,
+    "depthChanges": 0
+  },
+  "diagnostics": [
+    {
+      "mode": "1",
+      "id": "azure",
+      "identicalImage": true
+    },
+    {
+      "mode": "1",
+      "id": "copper",
+      "identicalImage": true
+    },
+    {
+      "mode": "1",
+      "id": "jade",
+      "identicalImage": true
+    },
+    {
+      "mode": "2",
+      "id": "azure",
+      "identicalImage": true
+    },
+    {
+      "mode": "2",
+      "id": "copper",
+      "identicalImage": true
+    },
+    {
+      "mode": "2",
+      "id": "jade",
+      "identicalImage": true
+    }
+  ],
+  "sourceAwareAuto": {
+    "uncolored": "azure",
+    "colored": "original",
+    "explicitOriginalRetained": true
+  },
+  "pngExport": {
+    "buttonDownload": true,
+    "filename": "comp5411-frame.png"
+  },
+  "experiment": {
+    "compared": [
+      "original",
+      "copper"
+    ],
+    "identicalMetricsAndSelections": true,
+    "actualMaterial": "original",
+    "edlStrength": 14,
+    "requestedMaterials": [
+      "original",
+      "copper"
+    ],
+    "controlsLocked": true,
+    "drawsPerRun": [
+      12,
+      12
+    ]
+  },
+  "mobile": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "selectorLeft": 123,
+    "selectorRight": 363,
+    "aboveCanvas": true
+  },
+  "consoleErrors": [],
+  "backend": "headless Chrome / SwiftShader; functionality checks only"
+}

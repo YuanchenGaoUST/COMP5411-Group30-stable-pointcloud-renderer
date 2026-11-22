@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "interaction": {
+    "changedChannels": 125847,
+    "depthChanges": 0,
+    "sameIds": true,
+    "drawn": 7500,
+    "budget": 7500,
+    "selectionReset": false,
+    "labels": [
+      "130.0°",
+      "12.0°",
+      "65%"
+    ]
+  },
+  "reset": {
+    "changedChannels": 0,
+    "direction": [
+      0.4000000059604645,
+      0.800000011920929,
+      0.6499999761581421
+    ]
+  },
+  "compatibility": {
+    "maxChannelDelta": 0,
+    "depthChanges": 0,
+    "foreground": 430
+  },
+  "experiment": {
+    "locked": true,
+    "unlocked": true,
+    "sunlight": {
+      "azimuth": 120,
+      "elevation": 30,
+      "intensity": 0.6,
+      "direction": [
+        0.7500000000000001,
+        0.49999999999999994,
+        -0.4330127018922192
+      ],
+      "ambient": 0.42,
+      "diffuse": 0.58,
+      "model": "two-sided-diffuse",
+      "castShadows": false
+    },
+    "allDrawsMatchExport": true,
+    "draws": 12,
+    "records": 2
+  },
+  "mobile": {
+    "width": 358,
+    "overflow": false
+  },
+  "consoleErrors": [],
+  "backend": "headless Chrome / SwiftShader; functionality checks only"
+}

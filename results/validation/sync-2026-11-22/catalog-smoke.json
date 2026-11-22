@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "tested": [
+    "five local catalog inputs",
+    "PCA/geometry metadata",
+    "mesh-derived provenance",
+    "all inputs have zero color saliency",
+    "actual WebGL foreground",
+    "fixed-count cap",
+    "aircraft low-budget camera playback",
+    "rapid async switching",
+    "aircraft direct preview link"
+  ],
+  "records": [
+    {
+      "id": "jetliner",
+      "count": 15000,
+      "budget": 7500,
+      "drawn": 7500,
+      "foregroundPixels": 53098,
+      "sourceURL": "https://opengameart.org/content/jumbo-jetwide-body",
+      "license": "CC0-1.0",
+      "saliencyMax": 0
+    },
+    {
+      "id": "funky-aircraft",
+      "count": 15000,
+      "budget": 7500,
+      "drawn": 7500,
+      "foregroundPixels": 64822,
+      "sourceURL": "https://opengameart.org/content/funky-aircraft",
+      "license": "CC0-1.0",
+      "saliencyMax": 0
+    },
+    {
+      "id": "stanford-bunny",
+      "count": 15000,
+      "budget": 7500,
+      "drawn": 7500,
+      "foregroundPixels": 145506,
+      "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
+      "saliencyMax": 0
+    },
+    {
+      "id": "stanford-dragon",
+      "count": 15000,
+      "budget": 7500,
+      "drawn": 7500,
+      "foregroundPixels": 137694,
+      "sourceURL": "https://graphics.stanford.edu/data/3Dscanrep/",
+      "license": "Stanford research-use permission; acknowledgment required; commercial use requires permission",
+      "saliencyMax": 0
+    },
+    {
+      "id": "teapot",
+      "count": 15000,
+      "budget": 7500,
+      "drawn": 7500,
+      "foregroundPixels": 99329,
+      "sourceURL": "https://casual-effects.com/g3d/data10/",
+      "license": "CC0-1.0",
+      "saliencyMax": 0
+    }
+  ],
+  "pageErrors": []
+}

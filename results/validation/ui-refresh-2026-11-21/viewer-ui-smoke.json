@@ -1,0 +1,144 @@
+{
+  "status": "passed",
+  "initial": {
+    "count": 15000,
+    "budget": 7500,
+    "material": "azure"
+  },
+  "desktop": {
+    "viewport": 1440,
+    "document": 1440,
+    "headerHeight": 60,
+    "canvasWidth": 1108,
+    "canvasHeight": 592,
+    "selectorsAboveCanvas": true,
+    "selectorsInViewport": true,
+    "sunlightOverflow": false
+  },
+  "mobile": {
+    "viewport": 390,
+    "document": 390,
+    "headerHeight": 75.5,
+    "canvasWidth": 364,
+    "canvasHeight": 328,
+    "selectorsAboveCanvas": true,
+    "selectorsInViewport": true,
+    "sunlightOverflow": false
+  },
+  "desktopResults": {
+    "viewport": 1440,
+    "document": 1440,
+    "headerHeight": 60,
+    "canvasWidth": 1108,
+    "canvasHeight": 592,
+    "selectorsAboveCanvas": true,
+    "selectorsInViewport": true,
+    "sunlightOverflow": false
+  },
+  "mobileResults": {
+    "viewport": 390,
+    "document": 390,
+    "headerHeight": 75.5,
+    "canvasWidth": 364,
+    "canvasHeight": 328,
+    "selectorsAboveCanvas": true,
+    "selectorsInViewport": true,
+    "sunlightOverflow": false
+  },
+  "mobileExpanded": {
+    "viewport": 390,
+    "document": 390,
+    "headerHeight": 75.5,
+    "canvasWidth": 364,
+    "canvasHeight": 328,
+    "selectorsAboveCanvas": true,
+    "selectorsInViewport": true,
+    "sunlightOverflow": false
+  },
+  "keyboardGuide": true,
+  "accessibleAdvancedControls": true,
+  "provenanceRetained": true,
+  "methods": [
+    {
+      "method": "uniform",
+      "drawn": 3000
+    },
+    {
+      "method": "screen",
+      "drawn": 3000
+    },
+    {
+      "method": "geometry",
+      "drawn": 3000
+    },
+    {
+      "method": "full",
+      "drawn": 3000
+    }
+  ],
+  "playbackFeedback": [
+    "play/pause",
+    "canvas pointer",
+    "canvas wheel",
+    "reset",
+    "dataset change",
+    "experiment"
+  ],
+  "experiment": {
+    "locked": true,
+    "stopped": true,
+    "unlocked": true,
+    "records": [
+      {
+        "mode": "uniform",
+        "stable": false,
+        "maxCount": 7500,
+        "maeRgb": 0.004529139433551198
+      },
+      {
+        "mode": "screen",
+        "stable": false,
+        "maxCount": 7500,
+        "maeRgb": 0.0015105906560154926
+      },
+      {
+        "mode": "screen",
+        "stable": true,
+        "maxCount": 7500,
+        "maeRgb": 0.0029842653110626967
+      },
+      {
+        "mode": "geometry",
+        "stable": false,
+        "maxCount": 7500,
+        "maeRgb": 0.0015380053255870248
+      },
+      {
+        "mode": "geometry",
+        "stable": true,
+        "maxCount": 7500,
+        "maeRgb": 0.003189058339385137
+      },
+      {
+        "mode": "full",
+        "stable": false,
+        "maxCount": 7500,
+        "maeRgb": 0.0015380053255870248
+      },
+      {
+        "mode": "full",
+        "stable": true,
+        "maxCount": 7500,
+        "maeRgb": 0.003189058339385137
+      }
+    ],
+    "material": "original",
+    "budget": 7500
+  },
+  "exports": {
+    "png": "comp5411-frame.png",
+    "json": "comp5411-experiment.json"
+  },
+  "consoleErrors": [],
+  "backend": "headless Chrome / SwiftShader; functionality checks only, not native GPU performance"
+}

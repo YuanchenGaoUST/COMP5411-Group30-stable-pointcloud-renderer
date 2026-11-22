@@ -79,7 +79,8 @@ export class SurfelRenderer {
     });
     return entry.promise;
   }
-  draw(camera,{radiusScale=1.8,pointMode=false,colorMode=0,edl=true,present=true,sunlight=DEFAULT_LIGHTING,background='solid',material=ORIGINAL_MATERIAL,edlStrength=14}={}){
+  draw(camera,{radiusScale=1.8,pointMode=false,rawPoints=false,pointSize=2,colorMode=0,edl=true,present=true,sunlight=DEFAULT_LIGHTING,background='solid',material=ORIGINAL_MATERIAL,edlStrength=14}={}){
+    if(rawPoints&&(!Number.isFinite(pointSize)||pointSize<=0))throw new RangeError('Point size must be a positive finite number of framebuffer pixels.');
     const gl=this.gl,t=this.targets;
     this.pollTimers();let query=null;
     if(this.timerEnabled&&this.timerExt&&this.pendingQueries.length<8){query=gl.createQuery();gl.beginQuery(this.timerExt.TIME_ELAPSED_EXT,query);}
@@ -88,6 +89,9 @@ export class SurfelRenderer {
     gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LESS);gl.disable(gl.BLEND);gl.disable(gl.CULL_FACE);gl.useProgram(this.surfel);gl.bindVertexArray(this.vao);
     gl.uniformMatrix4fv(gl.getUniformLocation(this.surfel,'uViewProjection'),false,camera.viewProjection);gl.uniformMatrix4fv(gl.getUniformLocation(this.surfel,'uView'),false,camera.view);
     gl.uniform1f(gl.getUniformLocation(this.surfel,'uRadiusScale'),radiusScale);gl.uniform1i(gl.getUniformLocation(this.surfel,'uPointMode'),pointMode?1:0);gl.uniform1i(gl.getUniformLocation(this.surfel,'uColorMode'),colorMode);
+    gl.uniform1i(gl.getUniformLocation(this.surfel,'uRawPoints'),rawPoints?1:0);
+    gl.uniform1f(gl.getUniformLocation(this.surfel,'uPointSize'),pointSize);
+    gl.uniform2f(gl.getUniformLocation(this.surfel,'uViewport'),this.canvas.width,this.canvas.height);
     gl.uniform3fv(gl.getUniformLocation(this.surfel,'uLightDirection'),sunlight.direction);gl.uniform1f(gl.getUniformLocation(this.surfel,'uAmbientLight'),sunlight.ambient);gl.uniform1f(gl.getUniformLocation(this.surfel,'uSunStrength'),sunlight.diffuse*sunlight.intensity);
     // Material choices only shade existing fragments. Input features, geometry,
     // instance count and packed depth are unchanged; diagnostics stay original.
@@ -98,7 +102,7 @@ export class SurfelRenderer {
     gl.drawArraysInstanced(gl.TRIANGLES,0,6,this.count);
     gl.bindFramebuffer(gl.FRAMEBUFFER,t.composed);gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.postVAO);gl.useProgram(this.post);
     gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,t.textures.color);gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,t.textures.depth);
-    gl.uniform1i(gl.getUniformLocation(this.post,'uColor'),0);gl.uniform1i(gl.getUniformLocation(this.post,'uDepth'),1);gl.uniform2f(gl.getUniformLocation(this.post,'uResolution'),this.canvas.width,this.canvas.height);gl.uniform1i(gl.getUniformLocation(this.post,'uEDL'),edl?1:0);
+    gl.uniform1i(gl.getUniformLocation(this.post,'uColor'),0);gl.uniform1i(gl.getUniformLocation(this.post,'uDepth'),1);gl.uniform2f(gl.getUniformLocation(this.post,'uResolution'),this.canvas.width,this.canvas.height);gl.uniform1i(gl.getUniformLocation(this.post,'uEDL'),edl&&!rawPoints?1:0);
     gl.uniform1f(gl.getUniformLocation(this.post,'uEDLStrength'),colorMode===0?edlStrength:14);gl.drawArrays(gl.TRIANGLES,0,3);
     if(query){gl.endQuery(this.timerExt.TIME_ELAPSED_EXT);this.pendingQueries.push(query);}
     if(present){

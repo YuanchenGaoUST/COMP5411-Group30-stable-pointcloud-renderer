@@ -16,7 +16,7 @@ try {
   await page.locator('#budget-value').fill('1000');await page.locator('#budget-value').dispatchEvent('change');await waitForSelection();
   for(const method of ['uniform','screen','geometry','full']){await page.selectOption('#method',method);await waitForSelection();const s=await page.evaluate(()=>window.COMP5411.state);check(s.drawn<=1000&&s.drawn>0,`Count invalid for ${method}`);}
   await page.locator('#stable').uncheck();await waitForSelection();check((await page.evaluate(()=>window.COMP5411.state.selection.stats.temporalEnabled))===false,'Stable-off not honored');
-  await page.locator('#stable').check();await page.locator('#quota').fill('0');await page.locator('#quota').dispatchEvent('change');await waitForSelection();check((await page.evaluate(()=>window.COMP5411.state.selection.stats.swaps))===0,'Zero quota permits swaps');
+  await page.locator('#stable').check();await page.locator('#stability-options > summary').click();await page.locator('#quota').fill('0');await page.locator('#quota').dispatchEvent('change');await waitForSelection();check((await page.evaluate(()=>window.COMP5411.state.selection.stats.swaps))===0,'Zero quota permits swaps');
   await page.selectOption('#primitive','points');await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())));await page.selectOption('#primitive','surfels');
   await page.locator('#edl').uncheck();await page.locator('#edl').check();
   await page.locator('#fixture').click();await page.waitForFunction(()=>window.COMP5411.state.count===8192);await waitForSelection();check((await page.evaluate(()=>window.COMP5411.state.cloudMetadata.preprocessorRecommended))===false,'Offline features not recognized');

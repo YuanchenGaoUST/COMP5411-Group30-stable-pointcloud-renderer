@@ -1,0 +1,138 @@
+{
+  "status": "passed",
+  "desktop": {
+    "viewport": 1440,
+    "document": 1440,
+    "controlsWithinViewport": true,
+    "togglesAboveCanvas": true,
+    "labelPx": 13,
+    "canvasWidth": 1090,
+    "canvasHeight": 592
+  },
+  "mobile": {
+    "viewport": 390,
+    "document": 390,
+    "controlsWithinViewport": true,
+    "togglesAboveCanvas": true,
+    "labelPx": 13,
+    "canvasWidth": 364,
+    "canvasHeight": 328
+  },
+  "displayNotesRemoved": true,
+  "selectionAndAttributesPreserved": true,
+  "surface": {
+    "drawn": 7500,
+    "foreground": 51123
+  },
+  "points": {
+    "drawn": 7500,
+    "foreground": 17700
+  },
+  "largerPointForeground": 51408,
+  "reference": {
+    "view": "points",
+    "drawn": 15000,
+    "count": 15000
+  },
+  "restoration": {
+    "sameImage": true,
+    "sameDepth": true
+  },
+  "experiment": {
+    "locked": true,
+    "unlocked": true,
+    "view": "points",
+    "sunStillDisabled": true,
+    "requestedRawPoints": true,
+    "rawPoints": false,
+    "material": "original",
+    "edlStrength": 14,
+    "records": 2,
+    "observed": [
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      },
+      {
+        "rawPoints": false,
+        "material": "original",
+        "edlStrength": 14
+      }
+    ]
+  },
+  "direct": {
+    "normalAndRadiusInvariant": true,
+    "sunAndEDLInvariant": true,
+    "foreground": 40,
+    "small": 12,
+    "large": 88,
+    "distant": 36,
+    "colors": [
+      "0,0,255",
+      "0,255,0",
+      "255,0,0"
+    ],
+    "depthValues": [
+      0.9909910559654236
+    ],
+    "error": 0
+  },
+  "deepLinkAndDatasetPersistence": true,
+  "exports": {
+    "png": "comp5411-frame.png",
+    "json": "comp5411-experiment.json"
+  },
+  "consoleErrors": [],
+  "backend": "headless Chrome / SwiftShader; functionality checks only, not native GPU performance"
+}

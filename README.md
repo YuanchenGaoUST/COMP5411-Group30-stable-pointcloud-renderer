@@ -28,6 +28,7 @@ Open:
 
 - [Viewer](http://127.0.0.1:5411/)
 - [Aircraft preview](http://127.0.0.1:5411/?dataset=jetliner)
+- [Aircraft as individual points](http://127.0.0.1:5411/?dataset=jetliner&view=points)
 
 On macOS, double-click `start.command`, or run `./start.command`. The launcher uses Python from your PATH; `PYTHON_BIN` and `PORT` can override its defaults.
 
@@ -40,6 +41,27 @@ python3 scripts/serve.py --port 5412
 The development server binds to `127.0.0.1`. Keep it running while using the viewer; opening `index.html` directly bypasses the local HTTP setup required by its modules and data loading.
 
 The interface is entirely in English. Select an input under **Built-in dataset**, drag to rotate, and scroll to zoom. Change the point budget and play a camera path to inspect coverage and temporal changes.
+
+### First session: a short walkthrough
+
+1. Open the [aircraft preview](http://127.0.0.1:5411/?dataset=jetliner). It starts with 7,500 of the model's 15,000 points. Drag to rotate, scroll to zoom, and double-click to reset the view.
+2. In **Point selection**, try budgets of 7,500, 3,000, and 1,500. Keep **Show full-point reference** off while exploring budgeted rendering: that checkbox intentionally draws the full input instead.
+3. Select **Orbit** under **Experiments**, then **Play path**. Switch **Enable stability control** off and on to inspect changes. The button shows **Pause path** during playback; dragging, zooming, resetting, changing input, or starting an experiment stops it.
+4. Try **Uniform**, **Screen**, **Geometry**, and **Full** at the same budget. The aircraft has no source colors, so Full and Geometry have the same scores on this input. Choose a colored synthetic scene to investigate the color-contrast term.
+5. Click **Run budget comparison**, wait for the table, then **Export results JSON**. This short diagnostic evaluates all methods and applicable stability variants, not just the method currently selected in the viewer. Keep the tab open while it runs.
+6. **Save frame** downloads the current rendered PNG. **Background**, **Material**, and **Sunlight** adjust presentation; quantitative comparisons retain the documented original-material policy.
+
+The viewer has a compact, neutral light interface ([actual interface preview](docs/images/viewer-interface.png)). **How to use** opens the inline guide. **Input details & source**, **Advanced stability settings**, and **Measurement notes** expose the technical details without crowding the default view. Display notes have been removed from the interface; background attribution and material policies remain documented below and in docs/AI_USAGE.md. On narrow screens, the input and selection controls appear below the viewer and experiments.
+
+### Point-cloud view
+
+Use **Point cloud** above the canvas to display small circular dots at the actual input positions. **Point size** controls their diameter from 1 to 6 CSS pixels. Dots do not use normals, surfel radii, surface lighting, or EDL. **Surface** restores the existing shaded surfels (or the selected legacy screen-facing splats). Switching views preserves the camera, point budget, and selector state; it does not generate a mesh or change the input data.
+
+The point-cloud view still displays the budgeted selection. To inspect all input points, enable **Show full-point reference**. Auto preserves colored input, and gives explicitly uncolored inputs a blue display tint; **Original** displays input colors or the recorded fallback. Other materials become flat tints in this view, not highlights or recovered textures. Color diagnostics remain available.
+
+The point-cloud view is an inspection mode. **Run budget comparison** always uses the surface rendering path, Original material, and standard EDL strength; it retains the chosen surface primitive and EDL checkbox setting. Exports distinguish actual `rendering` from requested `presentationRendering`, including the requested view and dot size. On completion the viewer returns to the selected display mode. Dot sizes are expressed as CSS pixels in the UI and as framebuffer pixels in the renderer API.
+
+Use the viewer in a browser tab; do not open `index.html` as a local file. If the localhost link stops working after restarting the computer, run `start.command` again and keep its terminal window open. Press **Ctrl+C** in that terminal to stop the server.
 
 ## Viewer features
 
@@ -86,7 +108,7 @@ The **Sunlight** panel beneath the canvas controls a directional light. Drag **A
 
 Shading uses `0.42 + 0.58 * intensity * abs(normal · lightDirection)`, with unit vectors in the dot product and intensity in `[0, 1]`. Ambient fill remains at zero sun intensity. The two-sided diffuse term tolerates flipped PCA normals, so opposite light directions produce the same brightness. This is an interactive shading aid, without cast shadows, sky simulation, or new surface reconstruction.
 
-Light changes do not reset selection or change the point budget, geometry scores, or offline color-contrast features. They do change RGB image measurements. Comparison runs lock the sunlight controls, use the same captured settings for every method and full-point reference, and export those settings under `rendering.sunlight`. Keep lighting fixed for temporal-stability experiments. The default/reset lighting preserves the original rendering formula.
+Light changes do not reset selection or change the point budget, geometry scores, or offline color-contrast features. They do change RGB image measurements. Comparison runs lock the sunlight controls, use the same captured settings for every method and full-point reference, and export those settings under `rendering.sunlight`. Keep lighting fixed for temporal-stability experiments. The default/reset lighting preserves the original rendering formula used in the archived pilot.
 
 ### Surface materials
 
@@ -245,6 +267,8 @@ As of **2026-10-10**:
 
 Stored evidence is under [results/validation](results/validation). Browser checks use SwiftShader in an isolated headless browser; their timings are diagnostic rather than native-GPU performance results.
 
+An additional 12-second, 361-capture orbit pilot at 320x240 and a 20% budget is archived under [results/progress-2026-10-21](results/progress-2026-10-21). On the synthetic PCA fixture, the Screen stability variant makes 25.4% fewer discretionary swaps per update, with slightly worse RGB error and foreground coverage. This is a limited tradeoff observation, not a general image-quality improvement.
+
 The analytical scene defaults to seed `5411`; the model catalog and planned experiments specify `20261010`. Preprocessing also accepts an explicit seed. Preserve each run's metadata rather than assuming one global seed.
 
 ## Tests
@@ -254,6 +278,8 @@ The analytical scene defaults to seed `5411`; the model catalog and planned expe
 Node.js **20+** is needed for JavaScript tests. NumPy is needed for Python tests.
 
 Current suite: 35 JavaScript tests and 26 Python tests, including English-interface regressions.
+
+The 22 November 2026 repository sync passed all 61 unit tests and seven browser suites: general rendering/experiments, catalog, sunlight, backgrounds, materials, viewer UI and point view. Compact reports and the rerun note are under [results/validation/sync-2026-11-22](results/validation/sync-2026-11-22). These browser checks use SwiftShader and are not native-GPU benchmarks.
 
 ~~~sh
 node --test tests/*.test.mjs
@@ -275,6 +301,8 @@ node scripts/catalog-browser-smoke.mjs results/local/catalog
 node scripts/sunlight-browser-smoke.mjs results/local/sunlight
 node scripts/background-browser-smoke.mjs results/local/backgrounds
 node scripts/material-browser-smoke.mjs results/local/materials
+node scripts/viewer-ui-smoke.mjs results/local/viewer-ui
+node scripts/point-view-browser-smoke.mjs results/local/point-view
 ~~~
 
 The scripts use the local Playwright package and managed Chromium by default. Optional environment overrides are `PLAYWRIGHT_MODULE`, `CHROME_PATH`, and `PROJECT_URL`.
@@ -301,7 +329,6 @@ data/
   models/                   Bundled processed model point clouds
   fixture.*                 Synthetic neighborhood fixture
   sources/                  Attribution and ignored original-model cache
-assets/backgrounds/         AI-generated display images and generation prompts
 experiments/plan.json        Planned evaluation matrix
 results/validation/         Archived implementation checks
 docs/                       Technical documentation, experiment notes, screenshots and demo

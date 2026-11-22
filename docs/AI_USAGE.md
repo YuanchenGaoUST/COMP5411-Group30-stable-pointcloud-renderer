@@ -32,18 +32,35 @@ Codex 协助检索作者/官方模型页并下载 OBJ/PLY 模型，生成了 sam
 
 来源、逐模型许可、SHA256 和采样 seed 见 data/catalog.json、data/models/*.json 的 metadata 及 data/sources/README.md。Stanford 许可是研究使用/免费分发并署名，不能标记为 CC0。
 
-## 2026-10-22 English interface and presentation controls
+## 2026-10-21 English interface and preliminary experiments
 
-Codex translated the viewer's controls, status/error messages, and catalog labels into English, and added English-interface regression tests. It also exposed the existing two-sided diffuse light through azimuth, elevation, intensity, and reset controls, connected these controls to shader uniforms, and included fixed lighting settings in experiment exports. These changes do not modify the point-selection algorithm or claim physically accurate solar illumination.
+Codex translated the viewer controls, added English-interface regression tests, and authored automation for the preliminary image study. Selection and rendering algorithms were unchanged. All seven variants and complete image-sample sequences, including unfavorable findings, remain in results/progress-2026-10-21. The study used the actual WebGL2 implementation with Chrome's SwiftShader software backend; its timings are not native-GPU performance measurements.
 
-Codex used the built-in image_gen tool to generate the Soft studio, Open sky, and Blue lab backgrounds. They are fixed 2D decorative images, not point-cloud renders, environment lighting, reconstructed geometry, cast shadows, or experimental evidence. The images were converted to JPEG without content edits. Full prompts, intended use, and postprocessing details are preserved in [assets/backgrounds/generation.json](../assets/backgrounds/generation.json).
+## 2026-10-22 Interactive sunlight
 
-The renderer composites these images only onto the final canvas. Saved presentation frames include the decoration, but diagnostic RGB/depth capture retains the original solid background. Exported experiment metadata identifies both the display choice and the diagnostic background. The existing GPU timer excludes the additional presentation pass, so it must not be described as total decorated-view rendering time. Browser checks use SwiftShader and do not establish native-GPU performance.
+Codex added azimuth, elevation, intensity and reset controls for the existing two-sided diffuse light, connected them to shader uniforms, and included fixed lighting settings in experiment exports. This is a visualization feature; it does not change point selection or claim physically accurate solar illumination. No external image or rendering library was added. Validation covers real WebGL shading changes, default-light compatibility, unchanged selected points/depth, and experiment settings/locking.
 
-No external rendering library was added. Team members remain responsible for reviewing the AI-assisted code, explaining the rendering and selection algorithms, and verifying any submitted claims.
+## 2026-10-22 Selectable presentation backgrounds
+
+Codex used the built-in image_gen tool to generate Soft studio, Open sky and Blue lab background images. Full prompts and JPEG conversion details are recorded in [assets/backgrounds/generation.json](../assets/backgrounds/generation.json). These fixed 2D images are decorative assets, not reconstructed scenes, environment lighting, cast shadows or measured rendering results.
+
+Codex implemented the background selector, cached image loading, final-canvas compositing and browser checks. Saved frames include the backdrop; diagnostic capture retains the original solid background and depth. The GPU timer excludes the presentation pass. Browser validation uses SwiftShader and does not establish native-GPU performance.
 
 ## 2026-10-22 Surface material presentation
 
-Codex implemented artistic blue enamel, copper and jade shader presets with broad Blinn–Phong highlights and softer EDL. The presets are hand-specified shader parameters, not AI-painted output images, recovered source textures or measured physical materials. Auto styling is limited to inputs explicitly marked as lacking source colors. Original rendering and diagnostic colors remain available.
+Codex implemented artistic blue enamel, copper and jade shader presets with broad Blinn–Phong highlights and softer EDL. These are shader parameters, not recovered source textures or AI-painted model renders. Auto applies blue only to inputs explicitly marked as lacking source colors. Material styling changes captured foreground RGB; quantitative comparisons therefore force Original material and baseline EDL strength, and record requested presentation settings separately. Point-cloud data and selection remain unchanged. New screenshots use actual renderer output over the existing AI-generated decorative backgrounds.
 
-Material styling changes foreground RGB. Quantitative comparisons force Original material and the baseline EDL strength, recording both actual experiment settings and requested presentation settings. Point-cloud data and selection are unchanged. New screenshots are actual renderer output; their existing decorative background remains explicitly AI-generated. The team must review and explain this AI-assisted implementation before submission.
+## 2026-11-21 Interface simplification and usage guide
+
+Codex simplified the existing HTML/CSS into a neutral light tool interface, added an inline English walkthrough, and grouped advanced settings and disclosures in native expandable sections. Source attribution and the AI-generated-background disclosure remain available; the less decorative interface does not change the project's AI-assistance record. No new generated images, dependencies, model data, or rendering algorithms were added.
+
+Camera playback now has explicit Play/Pause labels and an accessible pressed state; Reset view stops playback before restoring the camera. Browser checks exercise these interactions, exported files, comparison results, and desktop/mobile layouts. Captured previews are actual WebGL output, with the existing decorative backdrop; SwiftShader checks are not native-GPU performance measurements.
+
+## 2026-11-21 Typography and direct point-cloud inspection
+
+Codex refined typography using locally installed Avenir Next with system-font fallbacks; no remote font request, new font file, or dependency was added. Display notes and its old dynamic DOM bindings were removed at the user's request. Background generation attribution and material measurement policies remain in this document, the README, and assets/backgrounds/generation.json.
+
+Codex added a separate fixed-screen-size point-cloud view using instanced circular sprites centered on the existing selected point positions. This mode does not reconstruct surfaces or use normals, support radii, lighting, or EDL. Original and diagnostic colors are unlit; presentation materials act as flat tints. The 1–6 px control specifies CSS-pixel diameter. The previous surface path remains available and is used by comparisons; actual and requested rendering modes are exported separately. Preprocessing, source data, and point-selection algorithms are unchanged.
+
+New screenshots are actual application captures, not generated images. Browser checks cover point attributes/IDs, exact surface restoration, dot-size behavior, absent shading dependencies, exported PNG/JSON, and layout. All software-browser timings remain diagnostic only.
+

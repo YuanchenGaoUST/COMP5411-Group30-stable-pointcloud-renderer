@@ -1,26 +1,117 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>COMP5411 · Stable Point Cloud Rendering</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>COMP5411 · Stable Point Cloud Rendering</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
 <body>
-  <header><div><span class="eyebrow">HKUST · COMP5411 · GROUP 30</span><h1>Stable Point Cloud Rendering</h1><p>Explore detail, coverage and temporal stability under a fixed point budget.</p></div><span class="version">RESEARCH PROTOTYPE · 0.1</span></header>
+  <header class="app-header">
+    <h1>Stable Point Cloud Rendering</h1>
+    <span class="course-label">HKUST / COMP5411 / Group 30</span>
+  </header>
   <main>
-    <aside>
-      <section><h2>1 / Point cloud input</h2><label>Built-in dataset<select id="dataset"><option value="synthetic">Synthetic multi-depth scene</option><option value="fixture">Offline PCA test scene</option></select></label><p id="dataset-source" class="muted"></p><label class="file-label">Load PLY / XYZ / JSON<input id="file" type="file" accept=".ply,.xyz,.txt,.json"></label><button id="demo" class="secondary">Restore synthetic scene</button><button id="fixture" class="secondary">Load offline PCA fixture</button><p id="dataset-info" class="muted"></p></section>
-      <section><h2>2 / Budgeted point selection</h2><label>Selection method<select id="method"><option value="uniform">Uniform / spatial sampling</option><option value="screen">Screen / projected size</option><option value="geometry">Geometry / geometric features</option><option value="full" selected>Full / geometry + color contrast</option></select></label><label>Point budget <input id="budget-value" type="number" min="1" value="2880"></label><input id="budget" aria-label="Point budget" type="range" min="1" max="14400" value="2880"><p id="budget-fraction" class="muted"></p><label class="check"><input id="stable" type="checkbox" checked>Enable stability control</label><label>Max. swaps per update <output id="quota-value">10%</output><input id="quota" type="range" min="0" max="30" value="10"></label><label>Hysteresis margin <output id="margin-value">12%</output><input id="margin" type="range" min="0" max="50" value="12"></label></section>
-      <section><h2>3 / GPU rendering</h2><label>Surface representation<select id="primitive"><option value="surfels">Oriented surfel disks</option><option value="points">Screen-facing point sprites</option></select></label><label>Color display<select id="colors"><option value="0">Input color + lighting</option><option value="1">Geometry score diagnostic</option><option value="2">Color contrast diagnostic</option></select></label><label>Surfel radius scale <output id="radius-value">2.0×</output><input id="radius" type="range" min="5" max="50" value="20"></label><label class="check"><input id="edl" type="checkbox" checked>EDL depth enhancement</label><label class="check"><input id="reference" type="checkbox">Show full-point reference</label></section>
+    <aside aria-label="Point cloud controls">
+      <section aria-labelledby="input-title">
+        <h2 id="input-title">Input</h2>
+        <label>Built-in dataset
+          <select id="dataset">
+            <option value="synthetic">Synthetic multi-depth scene</option>
+            <option value="fixture">Offline PCA test scene</option>
+          </select>
+        </label>
+        <label class="file-label">Open PLY / XYZ / JSON
+          <input id="file" type="file" accept=".ply,.xyz,.txt,.json">
+        </label>
+        <div class="input-shortcuts">
+          <button id="demo" class="secondary">Synthetic scene</button>
+          <button id="fixture" class="secondary">PCA fixture</button>
+        </div>
+        <details id="input-details" class="control-details">
+          <summary>Input details &amp; source</summary>
+          <p id="dataset-source" class="muted"></p>
+          <p id="dataset-info" class="muted"></p>
+          <p id="feature-note" class="muted"></p>
+        </details>
+      </section>
+      <section aria-labelledby="selection-title">
+        <h2 id="selection-title">Point selection</h2>
+        <label>Selection method
+          <select id="method">
+            <option value="uniform">Uniform / spatial sampling</option>
+            <option value="screen">Screen / projected size</option>
+            <option value="geometry">Geometry / geometric features</option>
+            <option value="full" selected>Full / geometry + color contrast</option>
+          </select>
+        </label>
+        <label class="budget-label">Point budget <input id="budget-value" type="number" min="1" value="2880"></label>
+        <input id="budget" aria-label="Point budget" type="range" min="1" max="14400" value="2880">
+        <p id="budget-fraction" class="muted"></p>
+        <label class="check"><input id="stable" type="checkbox" checked>Enable stability control</label>
+        <details id="stability-options" class="control-details">
+          <summary>Advanced stability settings</summary>
+          <label>Max. swaps per update <output id="quota-value">10%</output><input id="quota" type="range" min="0" max="30" value="10"></label>
+          <label>Hysteresis margin <output id="margin-value">12%</output><input id="margin" type="range" min="0" max="50" value="12"></label>
+        </details>
+      </section>
+      <section aria-labelledby="rendering-title">
+        <h2 id="rendering-title">Rendering</h2>
+        <div id="surface-controls">
+        <label>Surface representation
+          <select id="primitive"><option value="surfels">Oriented surfel disks</option><option value="points">Screen-facing point sprites</option></select>
+        </label>
+        <label>Surfel radius scale <output id="radius-value">2.0×</output><input id="radius" type="range" min="5" max="50" value="20"></label>
+        <label class="check"><input id="edl" type="checkbox" checked>EDL depth enhancement</label>
+        </div>
+        <label>Color display
+          <select id="colors"><option value="0">Input color / presentation tint</option><option value="1">Geometry score diagnostic</option><option value="2">Color contrast diagnostic</option></select>
+        </label>
+        <label class="check"><input id="reference" type="checkbox">Show full-point reference</label>
+        <p class="muted">Reference displays all points, bypassing the budget.</p>
+      </section>
     </aside>
     <div class="workspace">
-      <div class="view-header"><div><strong id="scene-name">Loading…</strong><span id="feature-note"></span></div><span class="live-dot">LIVE WEBGL2</span></div>
-      <div class="backdrop-toolbar">
-        <div class="presentation-options">
-          <label for="background">Background<select id="background" aria-describedby="background-note"><option value="studio" selected>Soft studio</option><option value="sky">Open sky</option><option value="technical">Blue lab</option><option value="solid">Solid / diagnostic</option></select></label>
-          <label for="material">Material<select id="material" aria-describedby="material-note"><option value="auto" selected>Auto / preserve source colors</option><option value="original">Original / input colors</option><option value="azure">Blue enamel</option><option value="copper">Warm copper</option><option value="jade">Jade satin</option></select></label>
-        </div>
-        <div class="presentation-notes"><p id="background-note">Loading backdrop…</p><p id="material-note"></p></div>
+      <div class="view-header">
+        <div><span class="section-kicker">Viewer</span><strong id="scene-name">Loading…</strong></div>
+        <button id="export-frame" class="secondary">Save frame</button>
       </div>
-      <div class="canvas-wrap"><canvas id="viewport" aria-label="Interactive point cloud renderer"></canvas><div class="canvas-hint">Drag to rotate · Scroll to zoom · Double-click to reset</div></div>
+      <details id="quickstart" class="quickstart">
+        <summary>How to use</summary>
+        <ol>
+          <li><strong>Inspect a model.</strong> Choose a built-in dataset. Use Point cloud to see individual points, or Surface for shaded surfels. Drag to rotate, scroll to zoom, and double-click to reset the camera.</li>
+          <li><strong>Explore the budget.</strong> Lower Point budget, choose a selection method, then play a camera path. Toggle stability control to inspect point changes.</li>
+          <li><strong>Compare and export.</strong> Run budget comparison to test all methods with shared settings, then export results JSON. Save frame downloads the current view.</li>
+        </ol>
+        <p>For an easy first example, select Jumbo Jet. Full-point reference shows all points and bypasses the budget. Use a colored synthetic scene to evaluate the color-contrast term; the bundled mesh-derived models have no source colors.</p>
+      </details>
+      <div class="backdrop-toolbar">
+        <div class="view-mode-row">
+          <div class="view-switch" role="group" aria-label="Viewer representation">
+            <button id="view-surface" class="secondary" aria-pressed="true">Surface</button>
+            <button id="view-points" class="secondary" aria-pressed="false">Point cloud</button>
+          </div>
+          <label id="point-size-control" class="point-size-control" hidden>Point size
+            <input id="point-size" type="range" min="1" max="6" step="0.5" value="2" disabled>
+            <output id="point-size-value">2 px</output>
+          </label>
+        </div>
+        <div class="presentation-options">
+          <label for="background">Background
+            <select id="background"><option value="studio" selected>Soft studio</option><option value="sky">Open sky</option><option value="technical">Blue lab</option><option value="solid">Solid / diagnostic</option></select>
+          </label>
+          <label for="material">Material
+            <select id="material"><option value="auto" selected>Auto / preserve source colors</option><option value="original">Original / input colors</option><option value="azure">Blue enamel</option><option value="copper">Warm copper</option><option value="jade">Jade satin</option></select>
+          </label>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="viewport" aria-label="Interactive point cloud renderer"></canvas>
+        <div class="canvas-hint">Drag to rotate · Scroll to zoom · Double-click to reset</div>
+      </div>
       <section class="sunlight-panel" aria-labelledby="sunlight-title">
-        <div class="sunlight-heading"><h2 id="sunlight-title">Sunlight</h2><span class="muted">Two-sided diffuse lighting · No cast shadows</span></div>
+        <div class="sunlight-heading"><h2 id="sunlight-title">Sunlight</h2><span class="muted">Directional light · No cast shadows</span></div>
         <div class="sunlight-controls">
           <label>Azimuth <output id="sun-azimuth-value"></output><input id="sun-azimuth" type="range" min="0" max="360" step="any" aria-label="Sun azimuth" title="Direction around the model; 0 degrees is +Z"></label>
           <label>Elevation <output id="sun-elevation-value"></output><input id="sun-elevation" type="range" min="0" max="90" step="any" aria-label="Sun elevation" title="Height above the horizon"></label>
@@ -28,10 +119,34 @@
           <button id="sun-reset" class="secondary">Reset sun</button>
         </div>
       </section>
-      <div class="stats" aria-live="polite"><div><span>Drawn / budget</span><strong id="count-stat">—</strong></div><div><span>RAF FPS</span><strong id="fps-stat">—</strong></div><div><span>CPU selection</span><strong id="selection-stat">—</strong></div><div><span>Swaps / forced removals</span><strong id="turnover-stat">—</strong></div><div><span>GPU time</span><strong id="gpu-stat">—</strong></div></div>
-      <section class="experiments"><div class="experiment-heading"><div><h2>4 / Reproducible cameras and experiments</h2><p>Compare methods and stability settings with the same input, budget, camera path and shader.</p></div><button id="export-frame" class="secondary">Save frame</button></div><div class="experiment-controls"><select id="path" aria-label="Camera path"><option value="orbit">Orbit</option><option value="zoom">Zoom in / out</option><option value="boundary">Boundary sweep</option><option value="cut">Abrupt camera cut</option></select><button id="play">Play / pause path</button><button id="reset" class="secondary">Reset</button><button id="experiment" class="secondary">Run budget comparison</button><button id="export-results" class="secondary" disabled>Export results JSON</button></div><p id="status" role="status">Preparing data…</p><div id="result-table"></div></section>
-      <footer>Synthetic scenes validate functionality, not performance on real scans. Color contrast is an appearance proxy. Interactive selection runs at up to 30 Hz; experiments use a fixed 30 Hz.</footer>
+      <div class="stats" aria-label="Live rendering statistics">
+        <div><span>Drawn / budget</span><strong id="count-stat">—</strong></div>
+        <div><span>RAF FPS</span><strong id="fps-stat">—</strong></div>
+        <div><span>CPU selection</span><strong id="selection-stat">—</strong></div>
+        <div><span>Swaps / forced removals</span><strong id="turnover-stat">—</strong></div>
+        <div><span>GPU time</span><strong id="gpu-stat">—</strong></div>
+      </div>
+      <section class="experiments" aria-labelledby="experiments-title">
+        <div class="experiment-heading"><h2 id="experiments-title">Experiments</h2><p>Same input, budget and camera path across methods.</p></div>
+        <div class="experiment-controls">
+          <select id="path" aria-label="Camera path"><option value="orbit">Orbit</option><option value="zoom">Zoom in / out</option><option value="boundary">Boundary sweep</option><option value="cut">Abrupt camera cut</option></select>
+          <button id="play" class="secondary" aria-pressed="false">Play path</button>
+          <button id="reset" class="secondary">Reset view</button>
+          <button id="experiment">Run budget comparison</button>
+          <button id="export-results" class="secondary" disabled>Export results JSON</button>
+        </div>
+        <p id="status" role="status">Preparing data…</p>
+        <div id="result-table" role="region" aria-label="Comparison results" tabindex="0"></div>
+      </section>
+      <footer>
+        <details class="method-notes">
+          <summary>Measurement notes</summary>
+          <p>Comparisons use surface rendering, Original material and standard depth shading, including when launched from Point cloud view. The same sunlight settings are used for every method. Presentation backgrounds are excluded from image measurements.</p>
+          <p>Synthetic scenes validate functionality, not performance on real scans. Color contrast is an appearance proxy. Interactive selection runs at up to 30 Hz; experiments use a fixed 30 Hz. RAF FPS is not a GPU-only timing measurement.</p>
+        </details>
+      </footer>
     </div>
   </main>
   <script type="module" src="/src/main.js"></script>
-</body></html>
+</body>
+</html>

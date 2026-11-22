@@ -1,0 +1,54 @@
+{
+  "study": "Preliminary implementation progress study, not the final evaluation",
+  "created": "2026-10-21T11:57:11.073Z",
+  "inputs": [
+    "fixture",
+    "jetliner"
+  ],
+  "path": "orbit",
+  "durationSeconds": 12,
+  "selectionHz": 30,
+  "captures": 361,
+  "viewport": {
+    "width": 320,
+    "height": 240
+  },
+  "budgetRatio": 0.2,
+  "rendering": {
+    "pointMode": false,
+    "colorMode": 0,
+    "radiusScale": 2,
+    "edl": true
+  },
+  "selectionSettings": {
+    "emaSeconds": 0.12,
+    "hysteresis": 0.12,
+    "swapQuota": 0.1
+  },
+  "scoreWeights": "Unmodified SCORE_WEIGHTS in src/core/selection.js; see SHA-256 snapshot",
+  "candidatePolicy": "One shared per-update pool including union-retained IDs across all seven variants",
+  "reference": "Same-shader full-density image; not geometric ground truth",
+  "environment": {
+    "node": "v24.19.0",
+    "browser": "155.0.8059.85",
+    "backend": "Headless Chrome / ANGLE SwiftShader software rasterization"
+  },
+  "limitations": [
+    "One orbit, one budget, one seed; no statistical or cross-dataset generalization claim.",
+    "Fixture is synthetic; Jetliner is an uncolored mesh-derived sample, not a raw scan.",
+    "Jetliner has zero color saliency, so Geometry and Full have identical scores.",
+    "Readback synchronizes rendering; CPU timings are diagnostic wall time and do not establish native GPU performance.",
+    "Temporal metric uses nearest-neighbor reference reprojection and absolute raw-depth tolerance 0.0001.",
+    "All image samples and all seven variants are retained without selecting favorable frames."
+  ],
+  "hashes": {
+    "src/core/selection.js": "2f4f146d8834a907bf8d647dc4b9b7d6fe3f83cf3c5eba2fa28d4a2d49a0cea7",
+    "src/core/octree.js": "9f23a91efca933583a0c092d1b41c8b60e6c2be91fbb64b4b0c48fea9c4aef2c",
+    "src/core/metrics.js": "88a7b554d33b0375601966a8259e89534b06cd050b6d78f5cc4b9330f618f255",
+    "src/core/camera-paths.js": "9f49370c92cdb539a263f1fd119ac6ba98096f6d5020a836c3a73a2656a2f139",
+    "src/render/renderer.js": "8d01a051eadb7f325530d0f24f03d4f853c6842956a56904293d7a03101e6a94",
+    "src/render/shaders.js": "e521111f8eac9bb7d457ac0f3ef1dbe961135c90235d1955a4a753358116ac23",
+    "data/fixture.json": "32d5f92cd2db6e306524a4486843e7336ed86e70fce8b5dc40a65d3d8cdea7aa",
+    "data/models/jetliner.json": "48accc0230610382b44503c6044befe044cc84c50624b6f75d425c57b7f78a58"
+  }
+}

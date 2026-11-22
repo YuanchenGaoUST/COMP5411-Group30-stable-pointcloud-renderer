@@ -10,6 +10,9 @@ uniform mat4 uViewProjection;
 uniform mat4 uView;
 uniform float uRadiusScale;
 uniform int uPointMode;
+uniform bool uRawPoints;
+uniform float uPointSize;
+uniform vec2 uViewport;
 out vec2 vDisk;
 out vec3 vNormal;
 out vec3 vColor;
@@ -19,6 +22,16 @@ out float vSaliency;
 void main() {
   vec2 corners[6] = vec2[6](vec2(-1.,-1.),vec2(1.,-1.),vec2(-1.,1.),vec2(-1.,1.),vec2(1.,-1.),vec2(1.,1.));
   vec2 corner=corners[gl_VertexID];
+  if (uRawPoints) {
+    // A fixed-size screen-space dot at the input position. Preserve center
+    // depth, and do not depend on an estimated normal or support radius.
+    vec4 center=uViewProjection*vec4(aPosition,1.);
+    center.xy+=corner*uPointSize/uViewport*center.w;
+    gl_Position=center;
+    vDisk=corner; vNormal=vec3(0.,0.,1.); vColor=aColor;
+    vWorldPosition=aPosition; vGeometry=aGeometry; vSaliency=aSaliency;
+    return;
+  }
   vec3 n=normalize(aNormal);
   vec3 tangent=normalize(cross(abs(n.y)<0.9?vec3(0,1,0):vec3(1,0,0),n));
   vec3 bitangent=cross(n,tangent);
@@ -39,6 +52,7 @@ in vec3 vWorldPosition;
 in float vGeometry;
 in float vSaliency;
 uniform int uColorMode;
+uniform bool uRawPoints;
 uniform vec3 uLightDirection;
 uniform float uAmbientLight;
 uniform float uSunStrength;
@@ -55,21 +69,27 @@ void main() {
   vec3 base=vColor;
   if(uColorMode==1) base=mix(vec3(.05,.4,.7),vec3(1.,.63,.16),clamp(vGeometry,0.,1.));
   if(uColorMode==2) base=mix(vec3(.05,.4,.7),vec3(1.,.63,.16),clamp(vSaliency,0.,1.));
-  float light=uAmbientLight+uSunStrength*abs(dot(normalize(vNormal),normalize(uLightDirection)));
-  outColor=vec4(base*light,1.);
-  if(uStyledMaterial&&uColorMode==0){
-    // A broad, sun-driven highlight improves shape readability. Orient the
-    // shading normal toward the viewer to tolerate PCA normal sign ambiguity.
-    vec3 toCamera=uCameraPosition-vWorldPosition;
-    vec3 viewDirection=toCamera*inversesqrt(max(dot(toCamera,toCamera),1e-10));
-    vec3 n=normalize(vNormal);
-    if(dot(n,viewDirection)<0.) n=-n;
-    vec3 lightDirection=normalize(uLightDirection);
-    vec3 halfVector=lightDirection+viewDirection;
-    vec3 halfDirection=halfVector*inversesqrt(max(dot(halfVector,halfVector),1e-10));
-    float highlight=pow(max(dot(n,halfDirection),0.),uMaterialExponent)
-      *max(dot(n,lightDirection),0.)*uSunStrength*uMaterialSpecularStrength;
-    outColor=vec4(uMaterialBaseColor*light+uMaterialSpecularColor*highlight,1.);
+  if(uRawPoints){
+    // Input or diagnostic colors remain unlit. A presentation material acts
+    // only as a flat tint; it does not add shading to the point-cloud view.
+    outColor=vec4(uStyledMaterial&&uColorMode==0?uMaterialBaseColor:base,1.);
+  }else{
+    float light=uAmbientLight+uSunStrength*abs(dot(normalize(vNormal),normalize(uLightDirection)));
+    outColor=vec4(base*light,1.);
+    if(uStyledMaterial&&uColorMode==0){
+      // A broad, sun-driven highlight improves shape readability. Orient the
+      // shading normal toward the viewer to tolerate PCA normal sign ambiguity.
+      vec3 toCamera=uCameraPosition-vWorldPosition;
+      vec3 viewDirection=toCamera*inversesqrt(max(dot(toCamera,toCamera),1e-10));
+      vec3 n=normalize(vNormal);
+      if(dot(n,viewDirection)<0.) n=-n;
+      vec3 lightDirection=normalize(uLightDirection);
+      vec3 halfVector=lightDirection+viewDirection;
+      vec3 halfDirection=halfVector*inversesqrt(max(dot(halfVector,halfVector),1e-10));
+      float highlight=pow(max(dot(n,halfDirection),0.),uMaterialExponent)
+        *max(dot(n,lightDirection),0.)*uSunStrength*uMaterialSpecularStrength;
+      outColor=vec4(uMaterialBaseColor*light+uMaterialSpecularColor*highlight,1.);
+    }
   }
   // Store raw depth in an RGBA8 attachment for portable readPixels.
   float d=floor(gl_FragCoord.z*16777215.0+.5);

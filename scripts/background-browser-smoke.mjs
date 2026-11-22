@@ -74,7 +74,7 @@ try{
         const source=((capture.height-1-y)*capture.width+x)*4+channel,target=(y*capture.width+x)*4+channel;
         pngMaxDelta=Math.max(pngMaxDelta,Math.abs(decoded[target]-display[source]));
       }
-      return {id,png,note:document.getElementById('background-note').textContent.trim(),captureChanges,depthChanges,
+      return {id,png,captureChanges,depthChanges,
         changedBackgroundPixels,changedForegroundPixels,foregroundPixels,backgroundPixels,paletteSize:palette.size,
         sameIds:!before||JSON.stringify(ids)===JSON.stringify(before.ids),drawn:s.drawn,budget:s.budget,
         initialized:s.selection.stats.initialized,pngMaxDelta};
@@ -83,7 +83,7 @@ try{
     check(result.captureChanges===0&&result.depthChanges===0&&result.sameIds,`${id}: background changed experiment capture or selected point IDs`);
     check(result.changedForegroundPixels===0,`${id}: compositing changed foreground colors`);
     check(result.drawn===result.budget&&!result.initialized,`${id}: background reset selection or changed the point budget`);
-    check(result.note.length>0,`${id}: background description is absent`);
+    check(await page.locator('#display-notes, #background-note').count()===0,'Removed background notes remain in the interface');
     check(result.pngMaxDelta<=1,`${id}: PNG export does not match the displayed WebGL image`);
     if(id!=='studio')check(result.changedBackgroundPixels>result.backgroundPixels*.05,`${id}: visible backdrop did not change`);
     if(id!=='solid')check(result.paletteSize>32,`${id}: backdrop has too little variation to be the image`);
@@ -118,12 +118,12 @@ try{
 
   await page.setViewportSize({width:390,height:844});await frames();
   const mobile=await page.evaluate(()=>{
-    const selector=document.getElementById('background').getBoundingClientRect(),note=document.getElementById('background-note').getBoundingClientRect(),canvas=document.getElementById('viewport').getBoundingClientRect();
+    const selector=document.getElementById('background').getBoundingClientRect(),canvas=document.getElementById('viewport').getBoundingClientRect();
     return {viewportWidth:innerWidth,documentWidth:document.documentElement.scrollWidth,selectorLeft:selector.left,selectorRight:selector.right,
-      noteLeft:note.left,noteRight:note.right,aboveCanvas:selector.bottom<=canvas.top};
+      aboveCanvas:selector.bottom<=canvas.top};
   });
   check(mobile.documentWidth<=mobile.viewportWidth&&mobile.selectorLeft>=0&&mobile.selectorRight<=mobile.viewportWidth
-    &&mobile.noteLeft>=0&&mobile.noteRight<=mobile.viewportWidth&&mobile.aboveCanvas,'Background controls overflow or move below the canvas on mobile');
+    &&mobile.aboveCanvas,'Background controls overflow or move below the canvas on mobile');
   await page.screenshot({path:path.join(output,'background-mobile.png'),fullPage:true});
   check(errors.length===0,`Browser errors: ${errors.join('; ')}`);
   const report={status:'passed',assets,placement,backgrounds,experiment,mobile,consoleErrors:errors,
