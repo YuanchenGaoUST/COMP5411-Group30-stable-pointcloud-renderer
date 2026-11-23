@@ -64,3 +64,6 @@ Codex added a separate fixed-screen-size point-cloud view using instanced circul
 
 New screenshots are actual application captures, not generated images. Browser checks cover point attributes/IDs, exact surface restoration, dot-size behavior, absent shading dependencies, exported PNG/JSON, and layout. All software-browser timings remain diagnostic only.
 
+## Published application demo
+
+Codex assisted with capture and editing of the public application demo. The voice recording was supplied by a team member, and the images come from the actual viewer. The existing AI-generated decorative backgrounds remain disclosed above. Video edits adjust waiting and static holds; the matched stability OFF/ON footage retains the same camera path, budget and playback speed. The edited video is a demonstration, not a controlled hardware performance benchmark.

@@ -65,6 +65,12 @@ The point-cloud view is an inspection mode. **Run budget comparison** always use
 
 Use the viewer in a browser tab; do not open `index.html` as a local file. If the localhost link stops working after restarting the computer, run `start.command` again and keep its terminal window open. Press **Ctrl+C** in that terminal to stop the server.
 
+## Demo
+
+**[Watch the narrated demo — 2:29, 1080p](docs/demo/pointcloud-demo.mp4)**
+
+The video shows point-cloud and surface views, materials and lighting, model and background choices, point budgets, stability controls, and experiment export. It uses actual application footage. The matched OFF/ON clips retain the same camera path, budget and playback speed. Edited waiting and live counters are not controlled performance measurements.
+
 ## Viewer features
 
 - Static ASCII PLY, XYZ, and processed JSON input.
